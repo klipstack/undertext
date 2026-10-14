@@ -1,4 +1,5 @@
 mod ai;
+mod claude_code;
 
 use std::fs;
 use std::path::Path;
@@ -42,7 +43,9 @@ pub fn run() {
             ai::ai_key_status,
             ai::ai_set_key,
             ai::ai_clear_key,
-            ai::ai_request
+            ai::ai_request,
+            claude_code::claude_code_status,
+            claude_code::claude_code_set_enabled
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

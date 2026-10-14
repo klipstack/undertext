@@ -22,7 +22,7 @@ export class AiError extends Error {
 }
 
 /**
- * Sends one request to Claude from the Rust side, where the API key lives.
+ * Sends one request to Claude from the Rust side, which holds the API key or runs Claude Code.
  * In a plain browser during development, `mock` answers instead so the UI can be tried.
  */
 export async function callClaude<T>(call: AiCall, mock: () => T): Promise<T> {
@@ -54,3 +54,19 @@ export const aiKeyStatus = (): Promise<boolean> =>
 export const aiSetKey = (key: string) => invoke<void>("ai_set_key", { key });
 
 export const aiClearKey = () => invoke<void>("ai_clear_key");
+
+export interface ClaudeCodeStatus {
+  installed: boolean;
+  /** Claude Code is signed in. */
+  connected: boolean;
+  /** The person chose to use their subscription in Undertext. */
+  enabled: boolean;
+  /** "pro", "max", … when signed in with a Claude subscription */
+  plan: string | null;
+}
+
+/** Claude Code runs AI requests on the person's Claude subscription when no API key is set and they opted in. */
+export const claudeCodeStatus = () => invoke<ClaudeCodeStatus>("claude_code_status");
+
+/** Turns the subscription on or off for Undertext. Never signs Claude Code in or out. */
+export const claudeCodeSetEnabled = (enabled: boolean) => invoke<void>("claude_code_set_enabled", { enabled });

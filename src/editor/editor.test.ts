@@ -237,6 +237,7 @@ describe("command palette", () => {
         ghostLab: noop,
         clearLab: noop,
         setKey: noop,
+        connectSubscription: noop,
       },
     };
     const titles = buildCommands(ctx).map((c) => c.title);

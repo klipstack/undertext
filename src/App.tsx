@@ -17,6 +17,7 @@ import {
 } from "./ai/tasks";
 import { CommandPalette } from "./components/CommandPalette";
 import { KeyDialog } from "./components/KeyDialog";
+import { SubscriptionDialog } from "./components/SubscriptionDialog";
 import { LabBar } from "./components/LabBar";
 import { LabMenu } from "./components/LabMenu";
 import { ContextMenu, MenuItem, MenuState } from "./components/ContextMenu";
@@ -110,6 +111,7 @@ export default function App() {
   const aiRunRef = useRef(0);
   const [labOpen, setLabOpen] = useState(false);
   const [keyDialog, setKeyDialog] = useState<{ message?: string; hasKey: boolean } | null>(null);
+  const [subscriptionDialog, setSubscriptionDialog] = useState<{ message?: string; hasKey: boolean } | null>(null);
 
   // -------------------------------------------------------------------------
   // Helpers
@@ -234,6 +236,16 @@ export default function App() {
     setKeyDialog({ message, hasKey: await aiKeyStatus().catch(() => false) });
   };
 
+  const openSubscriptionDialog = async (message?: string) => {
+    setSubscriptionDialog({ message, hasKey: await aiKeyStatus().catch(() => false) });
+  };
+
+  /** A rejected key goes back to the key dialog; with no key, offer the subscription first. */
+  const openAiSetup = async (message: string) => {
+    if (await aiKeyStatus().catch(() => false)) void openKeyDialog(message);
+    else void openSubscriptionDialog(message);
+  };
+
   /** Runs one AI task at a time. Cancelling makes its result be ignored. */
   const runAi = async (label: string, work: (live: () => boolean) => Promise<void>) => {
     if (aiBusy) {
@@ -247,7 +259,7 @@ export default function App() {
       await work(live);
     } catch (err) {
       if (!live()) return;
-      if (err instanceof AiError && err.code === "no_key") void openKeyDialog(err.message);
+      if (err instanceof AiError && err.code === "no_key") void openAiSetup(err.message);
       else flash(err instanceof Error ? err.message : String(err));
     } finally {
       if (aiRunRef.current === run) setAiBusy(null);
@@ -783,6 +795,31 @@ export default function App() {
         />
       )}
 
+      {subscriptionDialog && (
+        <SubscriptionDialog
+          hasKey={subscriptionDialog.hasKey}
+          message={subscriptionDialog.message}
+          onEnabled={() => {
+            setSubscriptionDialog(null);
+            flash("Using your Claude subscription");
+            view().focus();
+          }}
+          onDisabled={() => {
+            setSubscriptionDialog(null);
+            flash("Stopped using your Claude subscription");
+            view().focus();
+          }}
+          onUseKey={() => {
+            setSubscriptionDialog(null);
+            void openKeyDialog();
+          }}
+          onClose={() => {
+            setSubscriptionDialog(null);
+            view().focus();
+          }}
+        />
+      )}
+
       {paletteOpen && info && (
         <CommandPalette
           commands={buildCommands({
@@ -812,6 +849,7 @@ export default function App() {
               ghostLab: () => finishLab(ghostLabSpans(view().state)),
               clearLab: () => finishLab(clearLab(view().state.tr)),
               setKey: () => void openKeyDialog(),
+              connectSubscription: () => void openSubscriptionDialog(),
             },
           })}
           recent={recent}

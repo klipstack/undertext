@@ -874,6 +874,14 @@ button:focus-visible {
   margin: 0;
 }
 
+.dialog:focus {
+  outline: none;
+}
+
+.dialog a {
+  color: var(--accent);
+}
+
 .dialog-alert {
   color: var(--mark-line);
 }

@@ -133,6 +133,14 @@ requests go out from the app's Rust side, so the key never reaches the web page.
 `ANTHROPIC_API_KEY` works too. Requests use `claude-opus-5-5`; a Lab run on a 1,000-word piece costs a
 few cents.
 
+**Or use your Claude subscription.** With no API key set, requests can go through
+[Claude Code](https://claude.com/code) on your Claude plan instead. Install Claude Code and sign in by
+running `claude` in a terminal, then press ⌘K, choose "Use your Claude subscription…", and confirm.
+Undertext never signs you in and never uses the subscription until you choose it there; "Stop using
+subscription" turns it off without signing Claude Code out. Requests count against your plan's usage
+limits. If `claude` isn't in `~/.local/bin`, `/opt/homebrew/bin`, or `/usr/local/bin`, set
+`CLAUDE_PATH`. A saved API key always takes priority.
+
 ## Known limitations
 
 - A ghost that covers only part of an alternative is lost when you save.

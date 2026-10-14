@@ -59,6 +59,7 @@ export interface PaletteContext {
     ghostLab(): void;
     clearLab(): void;
     setKey(): void;
+    connectSubscription(): void;
   };
 }
 
@@ -283,6 +284,7 @@ export function buildCommands(ctx: PaletteContext): PaletteCommand[] {
 
   // Settings
   add({ id: "settings.key", group: "Settings", title: "Set the Anthropic API key…", keywords: "ai claude token keychain", run: actions.setKey });
+  add({ id: "settings.subscription", group: "Settings", title: "Use your Claude subscription…", keywords: "ai claude code login account plan pro max", run: actions.connectSubscription });
 
   // Edit
   if (undoDepth(state) > 0) add({ id: "edit.undo", group: "Edit", title: "Undo", shortcut: "⌘Z", run: () => undo(view.state, view.dispatch) });

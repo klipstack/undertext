@@ -1,7 +1,8 @@
 //! Calls to the Claude API. The API key lives in the macOS Keychain (or the
 //! ANTHROPIC_API_KEY environment variable during development) and never
 //! reaches the web view: the page sends a prompt and a JSON schema, and gets
-//! back the parsed JSON answer.
+//! back the parsed JSON answer. Without a key, requests can go through Claude Code
+//! on the person's Claude subscription instead, once they choose to (see `claude_code`).
 
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -63,21 +64,30 @@ pub fn ai_clear_key() -> Result<(), String> {
 
 #[derive(Deserialize)]
 pub struct AiRequest {
-    system: String,
-    prompt: String,
-    schema: Value,
+    pub(crate) system: String,
+    pub(crate) prompt: String,
+    pub(crate) schema: Value,
     /// "low", "medium", or "high"
-    effort: String,
-    max_tokens: u32,
+    pub(crate) effort: String,
+    /// Only the API path uses this; Claude Code has no output limit option.
+    pub(crate) max_tokens: u32,
 }
 
 /// Errors start with a short code the page can branch on: `no_key:`, `refused:`, `api:`, `network:`.
 #[tauri::command]
 pub async fn ai_request(
+    app: tauri::AppHandle,
     client: tauri::State<'_, AiClient>,
     request: AiRequest,
 ) -> Result<Value, String> {
-    let key = api_key().ok_or("no_key: Add an Anthropic API key first.")?;
+    let Some(key) = api_key() else {
+        if crate::claude_code::enabled(&app) {
+            return crate::claude_code::request(&request, MODEL).await;
+        }
+        return Err(
+            "no_key: Add an Anthropic API key or use your Claude subscription first.".into(),
+        );
+    };
     let body = request_body(&request, true);
     let mut response = send(&client.0, &key, &body, true).await?;
 
