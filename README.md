@@ -197,8 +197,8 @@ update as you type.
   its fix becomes an alternative. A range such as 1990 – 1995, a dash that starts a line, and speech
   that breaks off ("But—”") don't count.
 - **Writing issues** (pink): grammar, spelling, and wrong words, from Claude. See below.
-- Click a row to go to the next one. The eye hides a kind on the page but keeps its count. Ghosted
-  text and code aren't checked. The rules are for English.
+- Click a row to go to the next one. The eye hides a kind on the page but keeps its count. Adverbs
+  start hidden, as in Hemingway. Ghosted text and code aren't checked. The rules are for English.
 
 **Click a highlight** to see why it's marked and what to do. A suggestion, in the form and case of
 your words, becomes an alternative, and ⌥K brings yours back. An adverb, qualifier, intensifier, or

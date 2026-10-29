@@ -55,8 +55,11 @@ export function altPanelHint(tab: AltTab, busy: boolean, pending: boolean): stri
   return `${keys} · ${busy ? "esc cancels" : "esc closes"}`;
 }
 
-/** The highlight kinds hidden last time. */
+/** Kinds hidden until you show them: adverbs, as in Hemingway, since a mark on every -ly word is mostly noise. */
+const FIRST_HIDDEN: readonly ReviewKind[] = ["adverb"];
+
+/** The highlight kinds hidden last time, or adverbs when none were saved. */
 export function savedHidden(prefs: { hidden?: unknown }): ReviewKind[] {
   const known: readonly unknown[] = REVIEW_KINDS;
-  return Array.isArray(prefs.hidden) ? prefs.hidden.filter((k): k is ReviewKind => known.includes(k)) : [];
+  return Array.isArray(prefs.hidden) ? prefs.hidden.filter((k): k is ReviewKind => known.includes(k)) : [...FIRST_HIDDEN];
 }

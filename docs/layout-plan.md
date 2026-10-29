@@ -322,6 +322,9 @@ Phases 4 and 5 don't need the checker, so either can come next.
   weakeners, blue, with a row each. "However," is a simpler word. "Currently" → "now" is marked,
   though Hemingway leaves it alone, because Zinsser names it. Rules that guess, such as "kind of"
   as a qualifier or "which" for "that", wait: they would need to start hidden.
+- Adverbs start hidden since 2026-10-29, as in Hemingway, which hides them by default. A mark on
+  every -ly word is often wrong: in "act independently", the adverb is the point. They are still
+  counted, and the eye shows them. A saved choice stays, so this reaches only a first launch.
 
 ## Spelling
 

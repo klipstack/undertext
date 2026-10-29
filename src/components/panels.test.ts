@@ -56,8 +56,10 @@ describe("Review's eye toggles", () => {
 
   it("come back from prefs, without kinds this version doesn't know", () => {
     expect(savedHidden({ hidden: ["adverb", "weasel", 3, "simpler"] })).toEqual(["adverb", "simpler"]);
-    expect(savedHidden({ hidden: "adverb" })).toEqual([]);
-    expect(savedHidden({})).toEqual([]);
+    // With none saved, adverbs start hidden, as in Hemingway. A saved choice to show them stays.
+    expect(savedHidden({ hidden: "adverb" })).toEqual(["adverb"]);
+    expect(savedHidden({})).toEqual(["adverb"]);
+    expect(savedHidden({ hidden: [] })).toEqual([]);
     // Claude's writing issues are a kind of Review's own, not of the prose checks.
     expect(savedHidden({ hidden: ["grammar", "cliche"] })).toEqual(["grammar", "cliche"]);
   });
