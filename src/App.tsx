@@ -63,7 +63,6 @@ import { parsePage } from "./editor/format";
 import { applyAllFixes, HighlightSettings, setHighlights, setWritingIssues, writingIssues } from "./editor/highlights";
 import { clearLab, ghostLabNotice, ghostLabSpans, jumpToLabSpan, labSpans, labState, makeCuts, setLab } from "./editor/lab";
 import { emptyLayers, layersOf, setLayers as layersEffect } from "./editor/layers";
-import { Kind } from "./editor/readability";
 import { jumpToMark, RewriteTarget, runFirstAction, useFixAt } from "./editor/popover";
 import { createEditorState, describe, EditorHandlers, EditorInfo, pageMarkdown } from "./editor/setup";
 import {
@@ -89,6 +88,7 @@ import { lookUp } from "./lib/lookup";
 import { popupNativeMenu } from "./lib/menu";
 import { speller } from "./lib/spelling";
 import { buildCommands, PaletteCommand } from "./palette/commands";
+import { Kind } from "./prose";
 import { WELCOME } from "./welcome";
 
 const SESSION_KEY = "undertext:session";

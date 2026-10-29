@@ -146,8 +146,8 @@ narrow window with both open, they overlap. That is fine at that width.
 
 ## Live checks
 
-All local, no network. `src/editor/readability.ts` holds the rules and imports nothing, so its
-tests run on plain strings. `src/editor/highlights.ts` draws them on the page.
+All local, no network. The rules are in `src/prose/`, a library with no editor code, so its tests
+run on plain strings. `src/editor/highlights.ts` draws them on the page.
 
 - **Prose**: paragraphs, list items, and quotes. Headings (also underlined ones), code (also
   indented), tables, HTML, link addresses, bare web addresses, and ghosted text are skipped. A

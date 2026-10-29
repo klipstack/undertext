@@ -1,9 +1,9 @@
 import { ChangeSet, EditorSelection, EditorState, Facet, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { proseBlocks } from "../prose";
 import { wordRangeAt } from "./commands";
 import { pageText } from "./highlights";
 import { layersOf } from "./layers";
-import { proseBlocks } from "./readability";
 
 // Spelling: words the Mac's spell checker doesn't know, underlined as you write. The checker runs
 // in Rust (src-tauri/src/spelling.rs) and answers later, so its answers are kept by paragraph text:

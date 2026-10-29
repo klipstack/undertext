@@ -1,11 +1,10 @@
 import { EditorSelection, EditorState, Facet, Prec, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { EditorView, keymap, showTooltip, Tooltip } from "@codemirror/view";
+import { Issue, Kind, Mistake, sentences } from "../prose";
 import { BLOCK_START, ghostAt, ghostRange, leadLength, removeSpan, reviveAt, touchesCode, unbalancedMarkup } from "./commands";
 import { applyFix, issueAt, nextIssue, reviewOpen, shownIssues, writingIssues } from "./highlights";
 import { layersOf } from "./layers";
 import { fixPunctuation, punctuationAt } from "./proofing";
-import { Mistake } from "./punctuation";
-import { Issue, Kind, sentences } from "./readability";
 import { fixSpelling, guessesFor, learnSpelling, Misspelling, misspellingAt } from "./spelling";
 
 // The popover: a click on a Review highlight explains it and offers what to do. It belongs to the

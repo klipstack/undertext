@@ -1,8 +1,8 @@
 import { KeyboardEvent, RefObject, useEffect, useRef } from "react";
 import { CHECKS, CheckId, TRIMS, TrimId } from "../ai/tasks";
-import { Kind } from "../editor/readability";
 import { useAllLabel } from "../editor/highlights";
 import { EditorInfo } from "../editor/setup";
+import { Kind } from "../prose";
 import { Icon } from "./Icon";
 import { RightTab } from "./panels";
 

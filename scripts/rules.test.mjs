@@ -1,5 +1,5 @@
 // Rules from CLAUDE.md that code can check. Reads this checkout's source; writes nothing.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -14,11 +14,27 @@ describe("how the editor is built", () => {
     expect([...new Set(dependencies("src/editor/format.ts"))]).toEqual(["@lezer/markdown"]);
   });
 
-  it("keeps the readability checks free of the editor: readability.ts imports nothing", () => {
-    expect(dependencies("src/editor/readability.ts")).toEqual([]);
+});
+
+describe("the prose library", () => {
+  const files = readdirSync(join(root, "src"), { recursive: true })
+    .map((path) => `src/${path}`)
+    .filter((path) => /\.tsx?$/.test(path));
+  const inside = (path) => path.startsWith("src/prose/");
+
+  it("imports nothing from outside src/prose: no editor, no network, no packages", () => {
+    const outside = files
+      .filter((path) => inside(path) && !path.endsWith(".test.ts"))
+      .flatMap((path) => dependencies(path).map((dep) => [path, dep]))
+      .filter(([, dep]) => !/^\.\/[\w.]+$/.test(dep));
+    expect(outside).toEqual([]);
   });
 
-  it("keeps the punctuation rules free of the editor: punctuation.ts imports only readability.ts", () => {
-    expect(dependencies("src/editor/punctuation.ts")).toEqual(["./readability"]);
+  it("is reached from outside only through src/prose/index.ts", () => {
+    const reaching = files
+      .filter((path) => !inside(path))
+      .flatMap((path) => dependencies(path).map((dep) => [path, dep]))
+      .filter(([, dep]) => /(?:^|\/)prose\//.test(dep));
+    expect(reaching).toEqual([]);
   });
 });

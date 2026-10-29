@@ -1,4 +1,4 @@
-import { Kind, KINDS } from "../editor/readability";
+import { Kind, KINDS } from "../prose";
 import type { AltTab } from "./AltPanel";
 
 /** The right panel's tabs. The panel shows one at a time. */

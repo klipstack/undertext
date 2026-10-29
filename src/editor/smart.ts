@@ -2,10 +2,10 @@ import { isolateHistory } from "@codemirror/commands";
 import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import { EditorState, TransactionSpec } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { pageDashStyle } from "../prose";
 import { leadLength } from "./commands";
 import { pageText } from "./highlights";
 import { layersOf } from "./layers";
-import { pageDashStyle } from "./readability";
 
 // Smart quotes and dashes as you type: " and ' become curly, and a second - turns "--" into a dash.
 // Not in code, HTML, or a link's address, and hyphens not at the start of a line or in a table,

@@ -63,15 +63,17 @@ the change, whether an agent or a review tool runs it.
   as the text. Undo restores them from a snapshot when a change touches a layer.
 - `preview.ts` hides Markdown syntax away from the cursor. `keys.ts` has Enter, Backspace, and the
   formatting, heading, and list commands. `ink.ts` draws underlines, gutter lines, and dots.
-  `lab.ts` holds Review's temporary marks and cuts. `readability.ts` finds hard sentences,
-  weakeners, simpler words, and dashes in plain text, and imports nothing. `highlights.ts` keeps
-  them, and Claude's writing issues, and draws them while Review is open. `spelling.ts` asks the Mac's spell
+  `lab.ts` holds Review's temporary marks and cuts. `highlights.ts` keeps Review's checks, and
+  Claude's writing issues, and draws them while Review is open. `spelling.ts` asks the Mac's spell
   checker (`src-tauri/src/spelling.rs`) about each changed paragraph after a pause, and keeps its
-  answers by paragraph text. `punctuation.ts` finds punctuation mistakes in plain text, most with one
-  right fix, and imports only `readability.ts`. `proofing.ts` marks them as you write, with Review open or
+  answers by paragraph text. `proofing.ts` marks punctuation mistakes as you write, with Review open or
   closed. `smart.ts` curls quotes and turns "--" into a dash as you type. `popover.ts` explains the
   mark you click and runs its fix. `clipboard.ts` keeps layers on copy and paste.
   `setup.ts` puts it together and builds the `EditorInfo` the React panels read.
+- `src/prose/` is a small library of checks for English prose, for any editor: no editor code, no
+  network, no packages. Code outside it imports only `src/prose/index.ts` (`scripts/rules.test.mjs`
+  checks both). `readability.ts` finds hard sentences, weakeners, simpler words, and dashes.
+  `punctuation.ts` finds punctuation mistakes, most with one right fix.
 - `src/App.tsx` is the app shell. `src/appearance.ts` holds the text size, theme, and line width,
   and `App.tsx` puts them on the page as CSS variables and `data-theme`. The left panel follows the caret (`src/components/AltPanel.tsx`).
   The right panel is about the whole page: Review and Overflow (`src/components/RightPanel.tsx`).

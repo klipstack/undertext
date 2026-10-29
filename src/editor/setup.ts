@@ -2,6 +2,7 @@ import { history, historyKeymap, insertNewline, standardKeymap } from "@codemirr
 import { markdown } from "@codemirror/lang-markdown";
 import { EditorState, Prec, StateCommand } from "@codemirror/state";
 import { drawSelection, dropCursor, EditorView, keymap } from "@codemirror/view";
+import { Kind, KINDS } from "../prose";
 import { clipboard } from "./clipboard";
 import {
   altInSelection,
@@ -27,7 +28,6 @@ import { actionHint, actionsFor, markAtCaret, popover, popoverAt, RewriteTarget 
 import { livePreview } from "./preview";
 import { proofing } from "./proofing";
 import { smartTyping } from "./smart";
-import { Kind, KINDS } from "./readability";
 import { Speller, spelling } from "./spelling";
 
 export interface EditorHandlers {

@@ -1,10 +1,10 @@
 import { EditorSelection, EditorState, StateField, Text, TransactionSpec } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { checkPunctuation, Mistake } from "../prose";
 import { fitFix, pageText } from "./highlights";
 import { layersOf } from "./layers";
-import { checkPunctuation, Mistake } from "./punctuation";
 
-// Proofing: punctuation mistakes (src/editor/punctuation.ts), marked as you write with a dotted
+// Proofing: punctuation mistakes (src/prose), marked as you write with a dotted
 // underline, like spelling, with Review open or closed. Most have one right fix, which replaces the
 // text. Nothing here is saved to the file.
 

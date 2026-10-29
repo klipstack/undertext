@@ -1,12 +1,12 @@
 import { invertedEffects, isolateHistory } from "@codemirror/commands";
 import { ChangeSet, EditorSelection, EditorState, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { checkPage, Issue, Kind, Report } from "../prose";
 import { articleFix, BLOCK_START, leadLength, touchesCode } from "./commands";
 import { Alt, newId } from "./format";
 import { layersOf, mapLayers, setLayers } from "./layers";
-import { checkPage, Issue, Kind, Report } from "./readability";
 
-// Highlights: hard sentences, weakeners, and simpler words (src/editor/readability.ts), and the
+// Highlights: hard sentences, weakeners, and simpler words (src/prose), and the
 // writing issues Claude finds on request. The checks always run, so the top bar can show the
 // grade. They show on the page only while Review is open, which is Hemingway's Edit mode.
 // Nothing here is saved to the file or changes the text, until you use a fix.
