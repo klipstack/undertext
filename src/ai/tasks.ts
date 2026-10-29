@@ -401,11 +401,12 @@ const REWRITE_GOALS: Partial<Record<Kind, string>> = {
   hard: "Make it easier to read: fewer words, plainer words, or two sentences.",
   veryHard: "Make it easier to read: fewer words, plainer words, or two sentences.",
   hidden: "Use a plain verb in place of the noun that hides the action, as “decided” for “made a decision”.",
+  cliche: "Say it in plain words of its own, in place of the cliché.",
   dash: "Use a comma, a colon, parentheses, or a period in place of each dash, and no dash at all.",
 };
 
 /** How the prompt names each kind of mark. */
-const MARK_NAMES: Partial<Record<Kind, string>> = { passive: "passive voice", hidden: "a hidden action" };
+const MARK_NAMES: Partial<Record<Kind, string>> = { passive: "passive voice", hidden: "a hidden action", cliche: "a cliché" };
 
 /**
  * What Claude is asked for a rewrite of the alternative `altId`: the paragraph with it marked, the

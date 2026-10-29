@@ -17,6 +17,8 @@ export const KINDS = [
   "filler",
   "hidden",
   "negative",
+  "redundant",
+  "cliche",
   "simpler",
   "dash",
   "dashStyle",
@@ -335,8 +337,9 @@ export function sentences(text: string): Span[] {
 // ---------------------------------------------------------------------------
 // Words
 
-// The weakener lists follow what Hemingway's web editor marked on test sentences, in October 2026.
-// They are short on purpose: a mark that is often wrong teaches you to ignore the marks.
+// The weakener lists follow what Hemingway's web editor marked on test sentences, in October 2026,
+// and add the clutter William Zinsser names in "On Writing Well". They are short on purpose: a mark
+// that is often wrong teaches you to ignore the marks.
 
 /** Matches any of the phrases as whole words, in any case. A space matches any run of space. */
 const phrases = (list: string[]) =>
@@ -360,7 +363,7 @@ const INTENSIFIERS = phrases([
 
 const FILLERS = phrases([
   "basically", "essentially", "of course", "needless to say", "it goes without saying", "it is worth noting",
-  "it should be noted", "it is important to note",
+  "it should be noted", "it is important to note", "I might add", "it is interesting to note", "it should be pointed out",
 ]);
 
 /** Word or phrase → the plainer one. A single word also matches its -s, -ed, and -ing forms. */
@@ -378,20 +381,31 @@ const SIMPLER: Record<string, string> = {
   possess: "have", "prior to": "before", purchase: "buy", regarding: "about", remainder: "rest", retain: "keep",
   "subsequent to": "after", subsequently: "later", sufficient: "enough", terminate: "end", transmit: "send",
   utilise: "use", utilization: "use", utilize: "use", "with regard to": "about", "with respect to": "about",
+  // Zinsser's clutter.
+  "a personal friend of mine": "my friend", "at an early date": "soon", "at the present time": "now", "by means of": "by",
+  currently: "now", "despite the fact that": "although", "during the course of": "during", "except for the fact that": "except that",
+  "for the purpose of": "for", "for the reason that": "because", "i personally": "I", "in a timely manner": "promptly",
+  "in close proximity to": "near", "in excess of": "more than", "in light of the fact that": "because",
+  "in reference to": "about", "in the vicinity of": "near", "in view of the fact that": "because",
+  "on a regular basis": "regularly", "on the grounds that": "because", "owing to the fact that": "because",
+  "referred to as": "called", "regardless of the fact that": "although", "the question as to whether": "whether",
+  "until such time as": "until", "with reference to": "about", "with the exception of": "except",
+  "with the possible exception of": "except",
 };
 
 /** Verbs whose forms don't follow the rules in `verbForms`: -s, past, -ing, and past participle. */
 const IRREGULAR_VERBS: Record<string, string> = {
-  agree: "agrees agreed agreeing agreed", build: "builds built building built", buy: "buys bought buying bought",
+  agree: "agrees agreed agreeing agreed", bite: "bites bit biting bitten", build: "builds built building built", buy: "buys bought buying bought",
   choose: "chooses chose choosing chosen", come: "comes came coming come", creep: "creeps crept creeping crept",
   cut: "cuts cut cutting cut", do: "does did doing done", drink: "drinks drank drinking drunk",
   eat: "eats ate eating eaten", find: "finds found finding found", get: "gets got getting gotten",
-  give: "gives gave giving given", have: "has had having had", keep: "keeps kept keeping kept",
+  give: "gives gave giving given", go: "goes went going gone", have: "has had having had", hit: "hits hit hitting hit",
+  keep: "keeps kept keeping kept",
   know: "knows knew knowing known", make: "makes made making made", pay: "pays paid paying paid",
   run: "runs ran running run", say: "says said saying said", send: "sends sent sending sent",
   show: "shows showed showing shown", slam: "slams slammed slamming slammed", snap: "snaps snapped snapping snapped",
   speak: "speaks spoke speaking spoken", speed: "speeds sped speeding sped", take: "takes took taking taken",
-  tiptoe: "tiptoes tiptoed tiptoeing tiptoed", tread: "treads trod treading trodden",
+  think: "thinks thought thinking thought", tiptoe: "tiptoes tiptoed tiptoeing tiptoed", tread: "treads trod treading trodden",
 };
 
 /** A verb's base, -s, past, -ing, and past participle forms. */
@@ -525,6 +539,58 @@ for (const [verb, plain] of Object.entries(NEGATED_VERBS)) {
 }
 const NEGATIVE = phrases([...NEGATIVE_FORMS.keys()]);
 
+// Redundant pairs: one word already says what the other adds, as in "end result". The fix keeps it.
+/** An adjective its noun already says. The noun may be plural: "free gifts" → "gifts". */
+const REDUNDANT_NOUNS =
+  "absolute guarantee, added bonus, advance planning, advance warning, basic fundamental, brief summary, " +
+  "close proximity, end result, final outcome, free gift, future plan, general consensus, new innovation, " +
+  "past experience, past history, personal friend, sum total, true fact, unexpected surprise";
+/** A verb and a word its meaning holds, in any tense: "reverted back" → "reverted". */
+const REDUNDANT_VERBS =
+  "blare loudly, collaborate together, combine together, cooperate together, gather together, join together, " +
+  "merge together, postpone until later, repeat again, return back, revert back, scream loudly, shout loudly, " +
+  "whisper quietly, whisper softly";
+/** Other phrases, and the word that says them. */
+const REDUNDANT_PHRASES: Record<string, string> = {
+  "absolutely essential": "essential", "atm machine": "ATM", "atm machines": "ATMs", "completely finished": "finished",
+  "completely unique": "unique", "consensus of opinion": "consensus", "each and every": "every", "first and foremost": "first",
+  "pin number": "PIN", "pin numbers": "PINs", "quite unique": "unique", "totally flabbergasted": "flabbergasted",
+  "totally unique": "unique", "very unique": "unique",
+};
+const REDUNDANT_FORMS = new Map(Object.entries(REDUNDANT_PHRASES));
+for (const pair of REDUNDANT_NOUNS.split(", ")) {
+  const [adjective, noun] = pair.split(" ");
+  const plural = /[^aeiou]y$/.test(noun) ? `${noun.slice(0, -1)}ies` : /(?:s|x|z|ch|sh)$/.test(noun) ? `${noun}es` : `${noun}s`;
+  REDUNDANT_FORMS.set(pair, noun).set(`${adjective} ${plural}`, plural);
+}
+for (const pair of REDUNDANT_VERBS.split(", ")) {
+  const [verb, rest] = pair.split(/ (.+)/);
+  for (const form of verbForms(verb)) REDUNDANT_FORMS.set(`${form} ${rest}`, form);
+}
+const REDUNDANT = phrases([...REDUNDANT_FORMS.keys()]);
+
+// Clichés: phrases worn so smooth they no longer say much. Only ones rarely meant literally.
+/** Phrases that start with a verb, in any tense. */
+const CLICHE_VERBS =
+  "bite the bullet, go the extra mile, hit the ground running, jump on the bandwagon, level the playing field, " +
+  "move the needle, open a can of worms, raise the bar, take it to the next level, think outside the box, touch base";
+const CLICHES = phrases([
+  "a perfect storm", "a win-win", "all walks of life", "at the end of the day", "back to square one",
+  "better late than never", "few and far between", "food for thought", "game changer", "game changers", "game-changer",
+  "game-changers", "in this day and age", "it is what it is", "last but not least", "level playing field",
+  "like the plague", "low hanging fruit", "low-hanging fruit", "needle in a haystack", "only time will tell",
+  "par for the course", "paradigm shift", "since the dawn of time", "the best of both worlds",
+  "the calm before the storm", "the elephant in the room", "the tip of the iceberg", "the writing on the wall",
+  "when all is said and done",
+  ...CLICHE_VERBS.split(", ").flatMap((phrase) => {
+    const [verb, rest] = phrase.split(/ (.+)/);
+    return verbForms(verb).map((form) => `${form} ${rest}`);
+  }),
+]);
+
+/** "However," at the start of a sentence, where "But" says it plainly. */
+const HOWEVER = /(?<=(?:^|[.!?]["'”’)\]*_]*\s)\s*)However,/g;
+
 /** A word's forms and what each can be, and some that don't exist, which never match. */
 function forms(word: string): [string, Role[]][] {
   if (word.includes(" ")) return [[word, ["base"]]];
@@ -578,12 +644,13 @@ const NOT_PARTICIPLES = new Set(
   "need bed red shed seed feed speed breed greed weed deed creed steed indeed hundred sacred naked wicked rugged ragged".split(" "),
 );
 
-const NOTES: Record<"adverb" | "passive" | "qualifier" | "intensifier" | "filler", string> = {
+const NOTES: Record<"adverb" | "passive" | "qualifier" | "intensifier" | "filler" | "cliche", string> = {
   adverb: "Adverb. Cut it if the sentence holds without it.",
   passive: "Passive voice. Say who does it.",
   qualifier: "Qualifier. It softens the point.",
   intensifier: "Intensifier. It rarely adds strength.",
   filler: "Filler. It adds words, not meaning.",
+  cliche: "Cliché. Say it in your own words.",
 };
 
 /** Plain words that can't follow a word like "a", "the", "his", or "this". "Many" can follow most of those. */
@@ -635,6 +702,12 @@ function wordIssues(text: string): { issues: Issue[]; weakeners: number } {
     return { note: `Negative. Try “${fix}”.`, fix };
   });
   add(WEAK_VERBS, "weakVerb", swap(WEAK_VERB_FORMS, (fix) => `Weak verb. Try “${fix}”.`, "Weak verb. Use one precise verb."));
+  add(REDUNDANT, "redundant", (m) => {
+    const fix = matchCase(REDUNDANT_FORMS.get(key(m[0]))!, m[0]);
+    return { note: `Redundant. Try “${fix}”.`, fix };
+  });
+  add(CLICHES, "cliche", () => ({ note: NOTES.cliche }));
+  add(HOWEVER, "simpler", () => ({ note: "Simpler: But.", fix: "But" }));
   const simpler = swap(SIMPLER_FORMS, (fix) => `Simpler: ${fix}.`, "Simpler word. Reword it plainly.", (m, plain) => {
     // "An additional fee" isn't "an more fee", and "do not often see" isn't "do rarely see".
     if (DETERMINERS.has(plain) && AFTER_DETERMINER.test(before(m))) return false;
@@ -655,8 +728,8 @@ function wordIssues(text: string): { issues: Issue[]; weakeners: number } {
   for (const m of text.matchAll(ADVERB)) {
     if (NOT_ADVERBS.has(m[0].toLowerCase())) continue;
     const holder = marks.find((i) => i.from <= m.index && m.index < i.to);
-    // A word with a simpler alternative is marked once, as that.
-    if (holder?.kind === "simpler") continue;
+    // A word with a simpler alternative, or one a redundant pair drops, is marked once, as that.
+    if (holder?.kind === "simpler" || holder?.kind === "redundant") continue;
     if (holder) shared++;
     kept.push({ from: m.index, to: m.index + m[0].length, kind: "adverb", note: NOTES.adverb });
   }

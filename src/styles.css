@@ -885,13 +885,15 @@ button:focus-visible {
 .hl-filler,
 .hl-hidden,
 .hl-negative,
+.hl-redundant,
+.hl-cliche,
 .hl-weak {
   background: var(--hl-weak);
 }
 
 /* A weakener inside another, such as an adverb in passive voice, adds no second tint. */
-:is(.hl-adverb, .hl-passive, .hl-qualifier, .hl-intensifier, .hl-weakVerb, .hl-filler, .hl-hidden, .hl-negative)
-  :is(.hl-adverb, .hl-passive, .hl-qualifier, .hl-intensifier, .hl-weakVerb, .hl-filler, .hl-hidden, .hl-negative) {
+:is(.hl-adverb, .hl-passive, .hl-qualifier, .hl-intensifier, .hl-weakVerb, .hl-filler, .hl-hidden, .hl-negative, .hl-redundant, .hl-cliche)
+  :is(.hl-adverb, .hl-passive, .hl-qualifier, .hl-intensifier, .hl-weakVerb, .hl-filler, .hl-hidden, .hl-negative, .hl-redundant, .hl-cliche) {
   background: none;
 }
 

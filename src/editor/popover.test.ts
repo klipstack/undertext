@@ -226,6 +226,27 @@ describe("popover actions", () => {
     expect(actionHint(issue, { kind: "fix", label: "strolled" })).toBe("Becomes an alternative. ⌥K brings your words back.");
   });
 
+  it("offer a rewrite for a cliché, and the word that says it all for a redundant pair", () => {
+    const cliche = stateFor("It moved the needle.\n");
+    const issue = popoverAt(click(cliche, 5))!;
+    expect(issue).toMatchObject({ kind: "cliche", from: 3, to: 19 });
+    expect(actionsFor(cliche, issue)).toEqual([{ kind: "rewrite", label: "Suggest rewrites" }]);
+    expect(rewriteRange(cliche, issue)).toEqual({ from: 0, to: 20 });
+    expect(popoverContent(cliche, issue)).toMatchObject({
+      title: "Cliché",
+      text: "Worn smooth by use, it says little. Say what you mean in plain words.",
+    });
+
+    let state = stateFor("The end result held.\n");
+    const pair = popoverAt(click(state, 6))!;
+    expect(popoverContent(state, pair)).toMatchObject({ title: "Redundant pair", text: "One word already says it all." });
+    expect(actionsFor(state, pair)).toEqual([{ kind: "fix", label: "result" }]);
+    state = state.update(runAction(state, pair, actionsFor(state, pair)[0])!).state;
+    expect(state.doc.toString()).toBe("The result held.");
+    expect(pageMarkdown(state, "")).toBe("The {{end result|>~result}} held.\n");
+    expect(undoRedo(state)).toEqual(["The end result held.\n", "The {{end result|>~result}} held.\n"]);
+  });
+
   it("fix the article before a suggestion, and back again with the original", () => {
     let state = stateFor("It was an initial test.\n");
     const issue = popoverAt(click(state, 12))!;

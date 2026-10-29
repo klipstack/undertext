@@ -128,6 +128,8 @@ const WEAKENERS: { kind: Kind; one: string; many: string }[] = [
   { kind: "filler", one: "filler", many: "fillers" },
   { kind: "hidden", one: "hidden action", many: "hidden actions" },
   { kind: "negative", one: "negative", many: "negatives" },
+  { kind: "redundant", one: "redundant pair", many: "redundant pairs" },
+  { kind: "cliche", one: "cliché", many: "clichés" },
 ];
 
 /**

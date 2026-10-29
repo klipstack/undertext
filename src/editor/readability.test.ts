@@ -275,6 +275,108 @@ describe("simpler words", () => {
   });
 });
 
+describe("clutter, as Zinsser has it", () => {
+  /** Each mark of these kinds as its text and its suggestion. */
+  const fixes = (text: string, kinds: Kind[]) =>
+    checkPage(text)
+      .issues.filter((i) => kinds.includes(i.kind))
+      .map((i) => [text.slice(i.from, i.to), i.fix]);
+
+  it("marks his wordy phrases as simpler words, with the plain word", () => {
+    const text =
+      "At the present time we wait until such time as they call. It is referred to as a stub, with the possible exception of one. I personally test it for the purpose of learning.";
+    expect(fixes(text, ["simpler"])).toEqual([
+      ["At the present time", "Now"],
+      ["until such time as", "until"],
+      ["referred to as", "called"],
+      ["with the possible exception of", "except"],
+      ["I personally", "I"],
+      ["for the purpose of", "for"],
+    ]);
+    // "Personally" is marked once, as part of its phrase.
+    expect(found(text, ["adverb"])).toEqual([]);
+  });
+
+  it("prefers his longer phrase to a redundant pair inside it", () => {
+    const text = "Despite the fact that it rained, we met in close proximity to the park. A personal friend of mine came in a timely manner.";
+    expect(fixes(text, ["simpler", "redundant"])).toEqual([
+      ["Despite the fact that", "Although"],
+      ["in close proximity to", "near"],
+      ["A personal friend of mine", "My friend"],
+      ["in a timely manner", "promptly"],
+    ]);
+  });
+
+  it("marks currently, which Hemingway leaves alone, with now", () => {
+    expect(fixes("We currently have two. Currently, it waits.", ["simpler", "adverb"])).toEqual([
+      ["currently", "now"],
+      ["Currently", "Now"],
+    ]);
+  });
+
+  it("suggests But for a sentence that opens with However and a comma", () => {
+    const text = "However, it failed. It failed, however, twice. It rained. However, we went. However you look at it, it failed.\n\n- However, the list holds.\n";
+    expect(fixes(text, ["simpler"])).toEqual([
+      ["However,", "But"],
+      ["However,", "But"],
+      ["However,", "But"],
+    ]);
+    expect(checkPage(text).issues[0]).toMatchObject({ from: 0, to: 8, kind: "simpler", note: "Simpler: But." });
+  });
+
+  it("marks his useless phrases as fillers", () => {
+    const text = "I might add that it works. It is interesting to note that it works. It should be pointed out that it works.";
+    expect(found(text, ["filler"])).toEqual([
+      ["filler", "I might add"],
+      ["filler", "It is interesting to note"],
+      ["filler", "It should be pointed out"],
+    ]);
+  });
+
+  it("marks a redundant pair with the word that says it all, in any form or case", () => {
+    const text = "The end result was free gifts. Past histories repeat. She reverted back, then returned back home. Each and every PIN number was very unique.";
+    expect(fixes(text, ["redundant"])).toEqual([
+      ["end result", "result"],
+      ["free gifts", "gifts"],
+      ["Past histories", "Histories"],
+      ["reverted back", "reverted"],
+      ["returned back", "returned"],
+      ["Each and every", "Every"],
+      ["PIN number", "PIN"],
+      ["very unique", "unique"],
+    ]);
+    expect(checkPage(text).issues.find((i) => i.kind === "redundant")?.note).toBe("Redundant. Try “result”.");
+  });
+
+  it("marks a redundant pair once, not the adverb or intensifier in it, and counts it as one weakener", () => {
+    const text = "She whispered quietly. It is very unique.";
+    expect(found(text)).toEqual([
+      ["redundant", "whispered quietly"],
+      ["redundant", "very unique"],
+    ]);
+    expect(checkPage(text).weakeners).toBe(2);
+  });
+
+  it("marks clichés in any tense, with no suggestion, as weakeners", () => {
+    const text =
+      "At the end of the day, it was low-hanging fruit. He thought outside the box and moved the needle. We will hit the ground running.";
+    expect(fixes(text, ["cliche"])).toEqual([
+      ["At the end of the day", undefined],
+      ["low-hanging fruit", undefined],
+      ["thought outside the box", undefined],
+      ["moved the needle", undefined],
+      ["hit the ground running", undefined],
+    ]);
+    const report = checkPage(text);
+    expect(report.issues[0].note).toBe("Cliché. Say it in your own words.");
+    expect(report.weakeners).toBe(5);
+  });
+
+  it("leaves the words of a cliché alone when they say something else", () => {
+    expect(found("The game changed. We think inside the box. The fruit hung low.")).toEqual([]);
+  });
+});
+
 describe("suggestions", () => {
   /** Each mark that has a suggestion, as its text and the suggestion. */
   const fixes = (text: string) =>

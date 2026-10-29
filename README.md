@@ -187,9 +187,11 @@ update as you type.
 - **Grade:** the Automated Readability Index of the page. It also shows in the top bar.
 - **Hard and very hard sentences** (yellow and red): 14 words or more, from grade 10 or 14.
 - **Weakeners** (blue): adverbs, passive voice, qualifiers, intensifiers, weak verbs (walked slowly
-  → strolled), fillers, hidden actions (made a decision → decided), and negatives (does not have →
-  lacks). The lists follow what Hemingway marks.
-- **Simpler words** (green): utilize → use, in order to → to.
+  → strolled), fillers, hidden actions (made a decision → decided), negatives (does not have →
+  lacks), redundant pairs (end result → result), and clichés (at the end of the day). The lists
+  follow what Hemingway marks, with the clutter William Zinsser names in *On Writing Well*.
+- **Simpler words** (green): utilize → use, in order to → to, at the present time → now, and
+  "However," at the start of a sentence → "But".
 - **Dashes** (teal): a paragraph may use dashes once, as a pair around an aside or one dash before a
   break. Each use after that is marked. A dash in another style than the page's is marked too, and
   its fix becomes an alternative. A range such as 1990 – 1995, a dash that starts a line, and speech
@@ -203,7 +205,7 @@ your words, becomes an alternative, and ⌥K brings yours back. An adverb, quali
 filler can be ghosted, so you read the sentence without it, or removed. A click on ghosted text
 offers "Remove it" and "Revive it". Removing tidies the spaces, commas, and capital around the
 words, and ⌘Z brings them back. Passive voice, hard sentences, hidden actions with no suggestion,
-and a dash too many offer "Suggest rewrites": Claude rewrites the sentence to fix it. The rewrites
+clichés, and a dash too many offer "Suggest rewrites": Claude rewrites the sentence to fix it. The rewrites
 that the checks no longer mark join it as alternatives. A rewrite with more dashes than your
 sentence is left out, and for a dash too many, one with any dash. Ask again for more.
 Only that button, ⌥↩ on such a mark, or its ⌘K entry sends the paragraph to Claude. ⌥↩ does the first action at

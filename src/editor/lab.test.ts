@@ -237,6 +237,18 @@ describe("AI results on the page", () => {
     );
   });
 
+  it("asks for plain words in place of a cliché, and drops a rewrite with one still in it", () => {
+    // "It moved the needle." at 0–20.
+    let state = stateFor("It moved the needle.\n");
+    const made = createAlt(state, 0, 20)!;
+    state = state.update(made.spec).state;
+    const cliche = rewritePrompt(state, made.id, "cliche", "moved the needle")!;
+    expect(cliche.system).toContain("Say it in plain words of its own, in place of the cliché.");
+    expect(cliche.system).toContain("The checks flagged “moved the needle” as a cliché.");
+    state = state.update(addRewrites(state, made.id, "cliche", ["It raised the bar.", "It changed sales a little."])!).state;
+    expect(findAlt(state, made.id)!.variants.slice(1)).toEqual(["It changed sales a little."]);
+  });
+
   it("drops Claude's rewrites that add a dash", () => {
     let state = stateFor("The door was quickly closed.\n");
     const made = createAlt(state, 0, 28)!;

@@ -175,7 +175,17 @@ a time. They are short on purpose: a mark that is often wrong teaches you to ign
   failed). A plain "do not want" isn't marked. Hemingway's category is "negative or indirect
   phrases", but it marked none of the indirect openings we tried.
 - **Simpler words**: a phrase list (utilize → use, in order to → to, not many → few), in any form
-  (modify → modified, transmit → transmitted).
+  (modify → modified, transmit → transmitted). "However," at the start of a sentence → "But".
+- **Redundant pairs**: one word already says what the other adds (end result → result, reverted back
+  → reverted, very unique → unique), in any tense, and nouns in the plural too. The adverb or
+  intensifier inside isn't marked again.
+- **Clichés**: exact phrases, verbs in any tense (moved the needle). Only ones rarely meant
+  literally; "at the end of the day" is the exception worth its false marks. No fix: the popover
+  offers "Suggest rewrites".
+
+Zinsser's clutter from *On Writing Well* adds to Hemingway's lists: wordy phrases (at the present
+time → now, for the purpose of → for), "currently" → "now", fillers (I might add, it is interesting
+to note), redundant pairs, and clichés.
 
 The longer match wins where two marks overlap. Adverbs and passive voice may sit inside other
 marks, so "really" counts as an intensifier and an adverb, as in Hemingway. Only one tint shows,
@@ -307,6 +317,11 @@ Phases 4 and 5 don't need the checker, so either can come next.
 - The weakener lists copy what Hemingway marks, checked sentence by sentence in its web editor.
   The first lists used broad patterns and marked about twice as much, much of it wrong, such as
   every "get".
+- Zinsser's rules joined them on 2026-10-28, only as exact lists that are rarely wrong: wordy
+  phrases, redundant pairs, clichés, and "However," → "But". Redundant pairs and clichés are
+  weakeners, blue, with a row each. "However," is a simpler word. "Currently" → "now" is marked,
+  though Hemingway leaves it alone, because Zinsser names it. Rules that guess, such as "kind of"
+  as a qualifier or "which" for "that", wait: they would need to start hidden.
 
 ## Spelling
 

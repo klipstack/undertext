@@ -158,6 +158,8 @@ const GUESSES = 4;
 
 const CUTS: readonly Kind[] = ["adverb", "qualifier", "intensifier", "filler"];
 const SENTENCES: readonly Kind[] = ["passive", "hard", "veryHard", "dash"];
+/** Marks whose sentence Claude may rewrite: a whole sentence's, and words no cut or fix mends. */
+const REWRITES: readonly Kind[] = [...SENTENCES, "hidden", "cliche"];
 
 /** A hard sentence itself, or the sentence around another mark, after any list or quote marker. */
 function sentenceAround(state: EditorState, issue: Issue): { from: number; to: number } {
@@ -221,7 +223,7 @@ export function whyNoAction(state: EditorState, issue: Mark): string | null {
     const inAlt = layersOf(state).alts.some((a) => a.from < issue.to && a.to > issue.from);
     return inAlt ? "It's inside an alternative, where a ghost isn't saved. Select the whole alternative and press ⌘/." : fallback;
   }
-  if (SENTENCES.includes(issue.kind) || issue.kind === "hidden") {
+  if (REWRITES.includes(issue.kind)) {
     const range = sentenceAround(state, issue);
     return blocker(state, range.from, range.to, true) ?? fallback;
   }
@@ -242,7 +244,7 @@ export function actionsFor(state: EditorState, issue: Mark): PopoverAction[] {
   if (CUTS.includes(issue.kind)) {
     return ghostRange(state, issue.from, issue.to) ? [{ kind: "ghost", label: "Ghost it" }, REMOVE] : [REMOVE];
   }
-  if (SENTENCES.includes(issue.kind) || issue.kind === "hidden") {
+  if (REWRITES.includes(issue.kind)) {
     return rewriteRange(state, issue) ? [{ kind: "rewrite", label: "Suggest rewrites" }] : [];
   }
   return [];
@@ -323,6 +325,8 @@ const TITLES: Record<Mark["kind"], string> = {
   filler: "Filler",
   hidden: "Hidden action",
   negative: "Negative",
+  redundant: "Redundant pair",
+  cliche: "Cliché",
   simpler: "Simpler word",
   dash: "Dash",
   dashStyle: "Dash style",
@@ -343,6 +347,8 @@ const ADVICE: Record<Mark["kind"], string> = {
   filler: "It adds words, not meaning.",
   hidden: "The action hides in a noun. Use the verb.",
   negative: "Say what is, not what isn't.",
+  redundant: "One word already says it all.",
+  cliche: "Worn smooth by use, it says little. Say what you mean in plain words.",
   simpler: "A plainer word says the same.",
   dash: "One dash, or one pair, per paragraph reads well. Try a comma, a colon, parentheses, or a period.",
   dashStyle: "Write the page's dashes one way.",
