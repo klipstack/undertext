@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createChecker } from "./checker";
 import { checkPunctuation, dashStyle, punctuationIn, SKIPPED } from "./punctuation";
 
 /** The marked text, its note, and its fix, for one block in the closed dash style. */
@@ -174,6 +175,8 @@ describe("the page", () => {
   });
 
   it("follows a new dash style in a block it has seen", () => {
+    const { checkPunctuation } = createChecker();
+    const page = (raw: string) => checkPunctuation(raw, raw).map((m) => [raw.slice(m.from, m.to), m.note, m.fix]);
     expect(page("It was late -- very late.\n")).toEqual([["late -- very", "Two hyphens for a dash.", "late—very"]]);
     expect(page("One — two. Three — four.\n\nIt was late -- very late.\n")).toEqual([
       ["late -- very", "Two hyphens for a dash.", "late — very"],

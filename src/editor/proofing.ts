@@ -1,7 +1,7 @@
 import { EditorSelection, EditorState, StateField, Text, TransactionSpec } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
-import { checkPunctuation, Mistake } from "../prose";
-import { fitFix, pageText } from "./highlights";
+import { Mistake } from "../prose";
+import { fitFix, pageChecker, pageText } from "./highlights";
 import { layersOf } from "./layers";
 
 // Proofing: punctuation mistakes (src/prose), marked as you write with a dotted
@@ -35,7 +35,7 @@ function draw(s: Omit<ProofingState, "decos">, doc: Text): ProofingState {
   return { ...s, decos: Decoration.set(shown.map((m) => mark.range(m.from, m.to))) };
 }
 
-const check = (state: EditorState) => checkPunctuation(pageText(state), state.doc.toString());
+const check = (state: EditorState) => pageChecker.checkPunctuation(pageText(state), state.doc.toString());
 
 export const proofingField = StateField.define<ProofingState>({
   create: (state) => draw({ mistakes: check(state), typing: null }, state.doc),

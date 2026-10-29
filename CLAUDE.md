@@ -76,7 +76,9 @@ the change, whether an agent or a review tool runs it.
   `words.ts` finds (weakeners and simpler words) and `dashes.ts` finds. `markdown.ts` picks the
   prose out of a Markdown page, and `sentences.ts` splits it. `punctuation.ts` finds punctuation
   mistakes, most with one right fix. `issues.ts` holds the kinds of marks, with a title and a line
-  of advice for each. `quotes.ts` curls quotes, and `articles.ts` picks "a" or "an".
+  of advice for each. `quotes.ts` curls quotes, and `articles.ts` picks "a" or "an". `checker.ts`
+  keeps one page's results between edits, so an edit checks only the paragraphs it changed; the
+  editor's is `pageChecker` in `highlights.ts`.
 - `src/App.tsx` is the app shell. `src/appearance.ts` holds the text size, theme, and line width,
   and `App.tsx` puts them on the page as CSS variables and `data-theme`. The left panel follows the caret (`src/components/AltPanel.tsx`).
   The right panel is about the whole page: Review and Overflow (`src/components/RightPanel.tsx`).

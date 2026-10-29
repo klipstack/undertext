@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Kind } from "./issues";
+import { createChecker } from "./checker";
 import { checkPage } from "./readability";
 import { sentences } from "./sentences";
 
@@ -655,6 +656,7 @@ describe("what counts as prose", () => {
   });
 
   it("gives the same answer for a paragraph it has seen before", () => {
+    const { checkPage } = createChecker();
     const text = `${HARD}\n\n${HARD}\n`;
     const report = checkPage(text);
     expect(report.issues.map((i) => [i.from, i.to])).toEqual([
@@ -666,8 +668,8 @@ describe("what counts as prose", () => {
 });
 
 describe("dashes", () => {
-  const dashes = (text: string) =>
-    checkPage(text)
+  const dashes = (text: string, check = checkPage) =>
+    check(text)
       .issues.filter((i) => i.kind === "dash" || i.kind === "dashStyle")
       .map((i) => [i.kind, text.slice(i.from, i.to), i.note, i.fix]);
   const ANOTHER = "Another dash in this paragraph.";
@@ -752,10 +754,12 @@ describe("dashes", () => {
   });
 
   it("follow the page's style as it changes", () => {
-    expect(dashes("One—two.\n\nFive — six.")).toEqual([
+    // One checker, as the editor has: a paragraph it has seen in one style is checked again in another.
+    const { checkPage: check } = createChecker();
+    expect(dashes("One—two.\n\nFive — six.", check)).toEqual([
       ["dashStyle", "Five — six.", "This page writes its dashes closed up: “word—word”.", "Five—six."],
     ]);
-    expect(dashes("One — two.\n\nThree — four.\n\nFive — six.")).toEqual([]);
+    expect(dashes("One — two.\n\nThree — four.\n\nFive — six.", check)).toEqual([]);
   });
 
   it("count neither kind as a weakener", () => {
@@ -769,6 +773,7 @@ describe("speed", () => {
   it("checks a long page full of dashes in well under a second per edit", () => {
     const para = "It was late — very late, and we left — fast. The plan — bold as ever — failed. ";
     const page = Array.from({ length: 160 }, (_, i) => `${i} ${para.repeat(4)}`).join("\n\n");
+    const { checkPage } = createChecker();
     checkPage(page);
     const start = performance.now();
     checkPage(page.replace("0 It", "0 Its"));

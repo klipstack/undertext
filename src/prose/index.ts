@@ -4,6 +4,7 @@
 // this folder imports only from here.
 
 export { startsWithVowelSound } from "./articles";
+export { type Checker, createChecker } from "./checker";
 export { dashesIn, hyphenDashes, pageDashStyle } from "./dashes";
 export { type Issue, type Kind, type Report, KIND_ADVICE, KIND_TITLES, KINDS } from "./issues";
 export { proseBlocks } from "./markdown";

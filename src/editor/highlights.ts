@@ -1,7 +1,7 @@
 import { invertedEffects, isolateHistory } from "@codemirror/commands";
 import { ChangeSet, EditorSelection, EditorState, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
-import { checkPage, Issue, KINDS, Report } from "../prose";
+import { createChecker, Issue, KINDS, Report } from "../prose";
 import { articleFix, BLOCK_START, leadLength, touchesCode } from "./commands";
 import { Alt, newId } from "./format";
 import { layersOf, mapLayers, setLayers } from "./layers";
@@ -58,6 +58,9 @@ function markFor(issue: ReviewIssue): Decoration {
   return mark;
 }
 
+/** The checks for the page in the editor, which keep each paragraph's results between edits. */
+export const pageChecker = createChecker();
+
 /** The page text with ghosts blanked out. Ghosted text doesn't count, as in the word count. */
 export function pageText(state: EditorState): string {
   let text = state.doc.toString();
@@ -89,12 +92,12 @@ const restoreWriting = invertedEffects.of((tr) => {
 });
 
 export const highlightsField = StateField.define<HighlightState>({
-  create: (state) => draw({ ...OFF, report: checkPage(pageText(state)), writing: null }),
+  create: (state) => draw({ ...OFF, report: pageChecker.checkPage(pageText(state)), writing: null }),
   update(prev, tr) {
     let next = prev;
     let changed = false;
     if (tr.docChanged || layersOf(tr.startState) !== layersOf(tr.state)) {
-      next = { ...next, report: checkPage(pageText(tr.state)), writing: mapWriting(prev.writing, tr.changes) };
+      next = { ...next, report: pageChecker.checkPage(pageText(tr.state)), writing: mapWriting(prev.writing, tr.changes) };
       changed = true;
     }
     for (const e of tr.effects) {
@@ -121,7 +124,7 @@ function mapWriting(writing: WritingIssue[] | null, changes: ChangeSet): Writing
 }
 
 export const highlights = (settings: HighlightSettings = OFF) =>
-  highlightsField.init((state) => draw({ ...settings, report: checkPage(pageText(state)), writing: null }));
+  highlightsField.init((state) => draw({ ...settings, report: pageChecker.checkPage(pageText(state)), writing: null }));
 
 export const setHighlights = (settings: Partial<HighlightSettings>): TransactionSpec => ({
   effects: settingsEffect.of(settings),

@@ -43,27 +43,34 @@ function checkBlock(text: string, style: DashStyle): BlockResult {
   return result;
 }
 
-// Most keystrokes change one block. The rest come from the last page's results, and only those are
-// kept, so the cache never outgrows the page.
-let seen = new Map<string, BlockResult>();
-
-export function checkPage(page: string): Report {
-  const report: Report = { issues: [], weakeners: 0, words: 0, letters: 0, sentences: 0, grade: null };
-  const kept = new Map<string, BlockResult>();
-  // A block's dashes depend on the page's style, so its result is kept for that style.
-  const style = pageDashStyle(page);
-  for (const block of proseBlocks(page)) {
-    const key = `${style}\n${block.text}`;
-    const result = seen.get(key) ?? kept.get(key) ?? checkBlock(block.text, style);
-    kept.set(key, result);
-    for (const i of result.issues) report.issues.push({ ...i, from: i.from + block.from, to: i.to + block.from });
-    report.weakeners += result.weakeners;
-    report.words += result.words;
-    report.letters += result.letters;
-    report.sentences += result.sentences;
-  }
-  seen = kept;
-  report.issues.sort((a, b) => a.from - b.from || b.to - a.to);
-  if (report.words) report.grade = ari(report.letters, report.words, report.sentences);
-  return report;
+/**
+ * Checks a page each time it changes. Most edits change one paragraph, so it keeps each paragraph's
+ * result from the last check and checks only the ones that changed. It keeps only those results, so
+ * it never outgrows the page. Use one for each page.
+ */
+export function readabilityChecker(): (page: string) => Report {
+  let seen = new Map<string, BlockResult>();
+  return (page) => {
+    const report: Report = { issues: [], weakeners: 0, words: 0, letters: 0, sentences: 0, grade: null };
+    const kept = new Map<string, BlockResult>();
+    // A block's dashes depend on the page's style, so its result is kept for that style.
+    const style = pageDashStyle(page);
+    for (const block of proseBlocks(page)) {
+      const key = `${style}\n${block.text}`;
+      const result = seen.get(key) ?? kept.get(key) ?? checkBlock(block.text, style);
+      kept.set(key, result);
+      for (const i of result.issues) report.issues.push({ ...i, from: i.from + block.from, to: i.to + block.from });
+      report.weakeners += result.weakeners;
+      report.words += result.words;
+      report.letters += result.letters;
+      report.sentences += result.sentences;
+    }
+    seen = kept;
+    report.issues.sort((a, b) => a.from - b.from || b.to - a.to);
+    if (report.words) report.grade = ari(report.letters, report.words, report.sentences);
+    return report;
+  };
 }
+
+/** The report on a page, checked from scratch. */
+export const checkPage = (page: string): Report => readabilityChecker()(page);

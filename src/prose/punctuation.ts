@@ -214,41 +214,46 @@ function addressEnd(skipped: string): number {
   }
 }
 
-let seen = new Map<string, Mistake[]>();
-
 /**
- * Mistakes on the page, in page order. `page` is the page with ghosts blanked out, and `raw` the
- * page as it is: where `page` has a space and `raw` doesn't, the text was skipped. Each block's
- * result is kept until the block or the page's dash style changes. A quote may run on into the next
- * paragraph, as in fiction, when that paragraph opens with one.
+ * Finds the mistakes on a page each time it changes, in page order. `page` is the page with ghosts
+ * blanked out, and `raw` the page as it is: where `page` has a space and `raw` doesn't, the text was
+ * skipped. A quote may run on into the next paragraph, as in fiction, when that paragraph opens with
+ * one. It keeps each block's result until the block or the page's dash style changes. Use one for
+ * each page.
  */
-export function checkPunctuation(page: string, raw: string): Mistake[] {
-  const blocks = proseBlocks(page, { headings: true });
-  // The page's style comes from its prose, as pageDashStyle has it.
-  const style = dashStyle(blocks.map((b) => b.text).join("\n\n"));
-  const kept = new Map<string, Mistake[]>();
-  const out: Mistake[] = [];
-  blocks.forEach((block, i) => {
-    const source = raw.slice(block.from, block.from + block.text.length);
-    const key = `${style}\u0001${block.text}\u0001${source}`;
-    let found = seen.get(key) ?? kept.get(key);
-    if (!found) {
-      let text = "";
-      for (let j = 0; j < block.text.length; j++) text += block.text[j] === " " && source[j] !== " " ? SKIPPED : block.text[j];
-      // What follows a bare address in the same run is prose again.
-      text = text.replace(/\uFFFC+/g, (run, at: number) => {
-        const end = addressEnd(source.slice(at, at + run.length));
-        return run.slice(0, end) + source.slice(at + end, at + run.length);
-      });
-      found = punctuationIn(text, style);
-    }
-    kept.set(key, found);
-    const runsOn = /^\s*“/.test(blocks[i + 1]?.text ?? "");
-    for (const f of found) {
-      if (runsOn && f.note === "No closing quote.") continue;
-      out.push({ ...f, from: f.from + block.from, to: f.to + block.from });
-    }
-  });
-  seen = kept;
-  return out;
+export function punctuationChecker(): (page: string, raw: string) => Mistake[] {
+  let seen = new Map<string, Mistake[]>();
+  return (page, raw) => {
+    const blocks = proseBlocks(page, { headings: true });
+    // The page's style comes from its prose, as pageDashStyle has it.
+    const style = dashStyle(blocks.map((b) => b.text).join("\n\n"));
+    const kept = new Map<string, Mistake[]>();
+    const out: Mistake[] = [];
+    blocks.forEach((block, i) => {
+      const source = raw.slice(block.from, block.from + block.text.length);
+      const key = `${style}\u0001${block.text}\u0001${source}`;
+      let found = seen.get(key) ?? kept.get(key);
+      if (!found) {
+        let text = "";
+        for (let j = 0; j < block.text.length; j++) text += block.text[j] === " " && source[j] !== " " ? SKIPPED : block.text[j];
+        // What follows a bare address in the same run is prose again.
+        text = text.replace(/\uFFFC+/g, (run, at: number) => {
+          const end = addressEnd(source.slice(at, at + run.length));
+          return run.slice(0, end) + source.slice(at + end, at + run.length);
+        });
+        found = punctuationIn(text, style);
+      }
+      kept.set(key, found);
+      const runsOn = /^\s*“/.test(blocks[i + 1]?.text ?? "");
+      for (const f of found) {
+        if (runsOn && f.note === "No closing quote.") continue;
+        out.push({ ...f, from: f.from + block.from, to: f.to + block.from });
+      }
+    });
+    seen = kept;
+    return out;
+  };
 }
+
+/** The mistakes on a page, checked from scratch. */
+export const checkPunctuation = (page: string, raw: string): Mistake[] => punctuationChecker()(page, raw);
