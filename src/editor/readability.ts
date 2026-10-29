@@ -657,6 +657,8 @@ const NOTES: Record<"adverb" | "passive" | "qualifier" | "intensifier" | "filler
 const DETERMINERS = new Set(["more", "most", "some", "enough"]);
 const AFTER_DETERMINER =
   /(?<![\p{L}\p{N}])(?:a|an|the|this|that|these|those|my|your|his|her|its|our|their|each|every|any|no)\s+$/iu;
+/** Words that "most" and "some" take "of" before: "most of the members", "some of them". */
+const OF_BEFORE = /^\s+(?:the|this|that|these|those|my|your|his|her|its|our|their|them|us|you|it|which|whom|whose)(?![\p{L}\p{N}])/iu;
 
 /** Starts with a capital where the marked text does. */
 const matchCase = (fix: string, marked: string) => (/^\p{Lu}/u.test(marked) ? fix[0].toUpperCase() + fix.slice(1) : fix);
@@ -715,7 +717,13 @@ function wordIssues(text: string): { issues: Issue[]; weakeners: number } {
     if (plain === "rarely" && (/(?<![\p{L}\p{N}])(?:do|does|did)\s+$/iu.test(before(m)) || /^\s+that(?![\p{L}\p{N}])/u.test(after(m)))) return false;
     return true;
   });
-  add(SIMPLER_WORDS, "simpler", simpler);
+  add(SIMPLER_WORDS, "simpler", (m) => {
+    const mark = simpler(m);
+    // "A majority of the members" is "most of the members": "of" stays before a word like "the".
+    if (!mark.fix || !DETERMINERS.has(mark.fix.toLowerCase()) || !/\sof$/i.test(m[0]) || !OF_BEFORE.test(after(m))) return mark;
+    const fix = `${mark.fix} of`;
+    return { note: `Simpler: ${fix}.`, fix };
+  });
   candidates.sort((a, b) => a.from - b.from || b.to - a.to);
 
   const kept: Issue[] = [];

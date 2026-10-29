@@ -513,6 +513,17 @@ describe("suggestions", () => {
     ]);
   });
 
+  it("keep the of of a phrase like a majority of before the, them, and words like them", () => {
+    const text = "A majority of the members voted. A number of them left. A majority of voters agreed. We met a number of his friends.";
+    expect(fixes(text)).toEqual([
+      ["A majority of", "Most of"],
+      ["A number of", "Some of"],
+      ["A majority of", "Most"],
+      ["a number of", "some of"],
+    ]);
+    expect(checkPage(text).issues[0].note).toBe("Simpler: Most of.");
+  });
+
   it("follow the spelling rules for a verb's forms, and the person of each form of be", () => {
     expect(fixes("He walked quickly home.")).toEqual([["walked quickly", "hurried"]]);
     expect(fixes("I am in agreement with you. Being in agreement with them helps.")).toEqual([
