@@ -1,9 +1,11 @@
 mod ai;
 mod claude_code;
+mod lookup;
 mod spelling;
 
 use std::fs;
 use std::path::Path;
+use tauri::Emitter;
 
 /// The page can only read and write text documents, never other files on disk.
 const DOCUMENT_EXTENSIONS: [&str; 3] = ["md", "markdown", "txt"];
@@ -81,6 +83,11 @@ fn open_url(url: String) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        // The page's right-click menu learns the chosen item here. Tauri's own per-item callback
+        // never reached the page.
+        .on_menu_event(|app, e| {
+            let _ = app.emit("menu-chosen", e.id().as_ref());
+        })
         .manage(ai::AiClient::default())
         .invoke_handler(tauri::generate_handler![
             read_text,
@@ -97,7 +104,8 @@ pub fn run() {
             ai::ai_request,
             ai::ai_cancel,
             claude_code::claude_code_status,
-            claude_code::claude_code_set_enabled
+            claude_code::claude_code_set_enabled,
+            lookup::look_up
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

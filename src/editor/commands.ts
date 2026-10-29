@@ -47,6 +47,23 @@ export function wordRangeAt(state: EditorState, pos: number): Span | null {
   return a === b ? null : { from: line.from + a, to: line.from + b };
 }
 
+/**
+ * What Look Up shows for a right click at `pos`: the selection when the click is in it, or the
+ * word there. Null when that has no letters or runs over more than one line.
+ */
+export function lookUpRange(state: EditorState, pos: number): Span | null {
+  const sel = state.selection.main;
+  const span = !sel.empty && sel.from <= pos && pos <= sel.to ? { from: sel.from, to: sel.to } : wordRangeAt(state, pos);
+  if (!span) return null;
+  const text = state.doc.sliceString(span.from, span.to);
+  // The word's own edges may hold a closing quote or a dash; a selection's may hold spaces.
+  const start = text.search(/[\p{L}\p{N}]/u);
+  const end = text.length - (text.match(/[^\p{L}\p{N}]*$/u)?.[0].length ?? 0);
+  const inner = text.slice(start, end);
+  if (start < 0 || inner.includes("\n") || !/\p{L}/u.test(inner)) return null;
+  return { from: span.from + start, to: span.from + end };
+}
+
 /** The paragraph at `pos`: from its first line to the end of its last. Null on a blank line. */
 export function blockAt(state: EditorState, pos = state.selection.main.head): Span | null {
   const { doc } = state;

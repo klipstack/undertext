@@ -76,8 +76,11 @@ the change, whether an agent or a review tool runs it.
   and `App.tsx` puts them on the page as CSS variables and `data-theme`. The left panel follows the caret (`src/components/AltPanel.tsx`).
   The right panel is about the whole page: Review and Overflow (`src/components/RightPanel.tsx`).
   `src/ai/tasks.ts` turns Claude's answers into page ranges.
+- The right-click menu is built in `App.tsx` and shown as a Mac menu by `src/lib/menu.ts`. The
+  browser preview shows `src/components/ContextMenu.tsx` instead.
 - `src-tauri/src/lib.rs`: file reads and writes (a save refuses to overwrite a change from another
   app unless told to), and `open_url` for web and mail links. `spelling.rs` wraps NSSpellChecker.
+  `lookup.rs` shows the Mac's Look Up panel for a word on the page.
 
 ## Tests
 

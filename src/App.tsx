@@ -56,6 +56,7 @@ import {
   takeSelectionText,
   ghostBlocked,
   toggleGhost,
+  lookUpRange,
   wordRangeAt,
 } from "./editor/commands";
 import { parsePage } from "./editor/format";
@@ -84,6 +85,8 @@ import {
   readDocument,
   saveDocument,
 } from "./lib/files";
+import { lookUp } from "./lib/lookup";
+import { popupNativeMenu } from "./lib/menu";
 import { speller } from "./lib/spelling";
 import { buildCommands, PaletteCommand } from "./palette/commands";
 import { WELCOME } from "./welcome";
@@ -648,6 +651,9 @@ export default function App() {
   // -------------------------------------------------------------------------
   // Context menu
 
+  /** Page text quoted for a menu label, cut short. */
+  const quoted = (text: string) => `“${text.length > 18 ? `${text.slice(0, 18)}…` : text}”`;
+
   /** `learned` is the word at `at` when it's in the Mac's own word list. */
   const buildMenu = (at: number | null, x: number, y: number, learned: string | null): MenuState | null => {
     const v = view();
@@ -668,6 +674,16 @@ export default function App() {
       items.push({ label: "Unlearn spelling", run: () => dispatch(unlearnSpelling(learned)) });
     }
     const spellingItems = items.length;
+
+    // Look Up comes next, as in other Mac apps. The browser preview has no Look Up.
+    const lookUpSpan = isTauri && at !== null ? lookUpRange(state, at) : null;
+    if (lookUpSpan) {
+      items.push({
+        label: `Look Up ${quoted(state.doc.sliceString(lookUpSpan.from, lookUpSpan.to))}`,
+        run: () => void lookUp(v, lookUpSpan).catch((err) => console.warn("Look Up failed:", err)),
+      });
+    }
+    const lookUpItems = items.length;
 
     if (hasSelection) {
       const ghosted = layersOf(state).ghosts.some((g) => g.from < sel.to && g.to > sel.from);
@@ -704,9 +720,8 @@ export default function App() {
       } else {
         const word = wordRangeAt(state, at);
         if (word) {
-          const text = state.doc.sliceString(word.from, word.to);
           items.push({
-            label: `Alternatives for “${text.length > 18 ? `${text.slice(0, 18)}…` : text}”`,
+            label: `Alternatives for ${quoted(state.doc.sliceString(word.from, word.to))}`,
             shortcut: "⌘⇧A",
             run: () => {
               v.dispatch({ selection: EditorSelection.range(word.from, word.to) });
@@ -727,7 +742,7 @@ export default function App() {
       });
     }
     items.push({ label: "All commands…", shortcut: "⌘K", run: openPalette });
-    if (spellingItems) items[spellingItems].divider = true;
+    for (const start of [spellingItems, lookUpItems]) if (start > 0 && items[start]) items[start].divider = true;
     return { x, y, items };
   };
 
@@ -744,7 +759,14 @@ export default function App() {
       const word = at === null ? null : misspellingAt(v.state, at);
       if (word) await loadGuesses(v, word).catch((err) => console.warn("Spelling guesses failed:", err));
       const learned = at === null || word ? null : await learnedWordAt(v, at).catch(() => null);
-      setMenu(buildMenu(at, x, y, learned));
+      const menu = buildMenu(at, x, y, learned);
+      if (!menu) return;
+      if (!isTauri) return setMenu(menu);
+      // A Mac menu, drawn by the system. Our own menu stands in if it fails.
+      popupNativeMenu(menu).catch((err) => {
+        console.warn("The Mac menu failed:", err);
+        setMenu(menu);
+      });
     }, 0);
   };
 

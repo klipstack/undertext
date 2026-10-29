@@ -90,7 +90,7 @@ storage, and answers AI requests with fake results so you can try the UI.
 | ⌘⇧8 ⌘⇧7 ⌘⇧9 | Bulleted, numbered, or task list. The same list again removes it. |
 | ⌘-click | Open a link |
 | ⌘O, ⌘S, ⌘⇧S, ⌘N | Open, save, save as, new |
-| Right click | Context menu. On a misspelled word, it starts with suggestions. Shift + right click shows the system menu. |
+| Right click | Context menu. On a misspelled word, it starts with suggestions. "Look Up" shows the Mac's dictionary. Shift + right click shows the system menu. |
 
 - ⌥J, ⌥K, ⌥H, and ⌥L match the physical key, so they work on any keyboard layout. In Undertext they no
   longer type ∆ ˚ ˙ ¬. Dead keys such as ⌥E and ⌥N still work for accents and ñ.

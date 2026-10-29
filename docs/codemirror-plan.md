@@ -205,6 +205,14 @@ Total: about 3–4 weeks of focused work.
   the move: at first, typing at its end added plain text after it.)
 - `:::alt` stays for now, despite the clash with Pandoc and Docusaurus blocks.
 - A drag always selects text. It never moves text.
+- The right-click menu is a Mac menu (Tauri's `Menu.popup`), with our own items. The browser
+  preview keeps the page's menu. Shift + right click still shows WebKit's menu.
+  Tauri's per-item callbacks never reached the page, so `lib.rs` sends the chosen item's id as a
+  `menu-chosen` event.
+- Look Up comes after the spelling guesses, as in TextEdit. It shows the selection when the click
+  is in it, else the word. A Mac menu doesn't bring Look Up by itself: WebKit's menu has it, and
+  Tauri's can't add it. So `src-tauri/src/lookup.rs` calls `showDefinitionForAttributedString` on
+  the webview, with the text's font and baseline so the panel draws the word in place.
 
 ## Next
 
