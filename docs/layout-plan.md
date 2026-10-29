@@ -152,9 +152,11 @@ run on plain strings. `src/editor/highlights.ts` draws them on the page.
 - **Prose**: paragraphs, list items, and quotes. Headings (also underlined ones), code (also
   indented), tables, HTML, link addresses, bare web addresses, and ghosted text are skipped. A
   sentence never runs from one list item into the next.
-- **Sentences**: split after `.`, `!`, and `?`. Not after "Mr.", an initial, "e.g.", or a decimal
-  point, and not when the next word starts in lowercase. "No." and "fig." are abbreviations only
-  before a number.
+- **Sentences**: split after `.`, `!`, `?`, and `…`. Not after a title ("Mr.", "Gen.") or "e.g.",
+  or a decimal point, and not when the next word starts in lowercase. After an initial, a dotted
+  word ("U.S.", "p.m."), or an abbreviation such as "Inc." or "Sept.", only when a word that often
+  opens sentences follows: "plan B. The…" ends, "John F. Kennedy" doesn't. "No." and "fig." are
+  abbreviations only before a number. A lowercase brand after a period ("iPhone") still runs on.
 - **Grade**: the Automated Readability Index, rounded, never below zero.
 - **Hard and very hard**: a sentence of 14 or more words, by its own grade: hard from 10, very hard
   from 14.

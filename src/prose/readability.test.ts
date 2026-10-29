@@ -45,6 +45,45 @@ describe("sentences", () => {
     expect(split("Wait... What happened?")).toEqual(["Wait...", "What happened?"]);
   });
 
+  it("ends a sentence at an initial or a dotted word when a word that opens sentences follows", () => {
+    expect(split("I got an A. Then I left. We need plan B. The first one failed.")).toEqual([
+      "I got an A.",
+      "Then I left.",
+      "We need plan B.",
+      "The first one failed.",
+    ]);
+    expect(split("He moved to the U.S. She stayed. We left at 5 p.m. The rain stopped. Visit example.com. Then sign up.")).toEqual([
+      "He moved to the U.S.",
+      "She stayed.",
+      "We left at 5 p.m.",
+      "The rain stopped.",
+      "Visit example.com.",
+      "Then sign up.",
+    ]);
+    expect(split("He works at Acme Inc. The firm grew.")).toEqual(["He works at Acme Inc.", "The firm grew."]);
+  });
+
+  it("keeps a name's initials, a title, or e.g. in its sentence, whatever follows", () => {
+    expect(split("John F. Kennedy was president. J. I. Rodale founded it.")).toEqual([
+      "John F. Kennedy was president.",
+      "J. I. Rodale founded it.",
+    ]);
+    expect(split("Gen. Patton led them. Sen. Warren spoke. Some bands, e.g. The Who, toured.")).toEqual([
+      "Gen. Patton led them.",
+      "Sen. Warren spoke.",
+      "Some bands, e.g. The Who, toured.",
+    ]);
+  });
+
+  it("reads a short month as an abbreviation, and ends a sentence at …", () => {
+    expect(split("It was Jan. 5 when we met. We left in Sept. Then it snowed.")).toEqual([
+      "It was Jan. 5 when we met.",
+      "We left in Sept.",
+      "Then it snowed.",
+    ]);
+    expect(split("Wait… What happened? He paused… then left.")).toEqual(["Wait…", "What happened?", "He paused… then left."]);
+  });
+
   it("counts text with no closing punctuation as a sentence", () => {
     expect(split("Notes: the plan for today")).toEqual(["Notes: the plan for today"]);
   });
