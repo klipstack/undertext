@@ -75,6 +75,44 @@ describe("sentences", () => {
     ]);
   });
 
+  it("goes on past a version, a dotted name, a title, or a quoted question", () => {
+    expect(split("Version 2.0 shipped. Use Node.js for it. He earned a Ph.D. in physics. T.S. Eliot read it.")).toEqual([
+      "Version 2.0 shipped.",
+      "Use Node.js for it.",
+      "He earned a Ph.D. in physics.",
+      "T.S. Eliot read it.",
+    ]);
+    expect(split("The U.S. Army arrived. Lt. Col. Smith arrived. Capt. Jones left. Dr. Who is a show.")).toEqual([
+      "The U.S. Army arrived.",
+      "Lt. Col. Smith arrived.",
+      "Capt. Jones left.",
+      "Dr. Who is a show.",
+    ]);
+    expect(split('"Why?" she asked. Apples, pears, etc. are fruit. (See below.) Then we left.')).toEqual([
+      '"Why?" she asked.',
+      "Apples, pears, etc. are fruit.",
+      "(See below.)",
+      "Then we left.",
+    ]);
+  });
+
+  it("ends a sentence after an abbreviation, a letter, or a number that closes it", () => {
+    expect(split("She lives on Main St. It is quiet. Vitamin C. It helps. The rate was 3.5. Then it fell.")).toEqual([
+      "She lives on Main St.",
+      "It is quiet.",
+      "Vitamin C.",
+      "It helps.",
+      "The rate was 3.5.",
+      "Then it fell.",
+    ]);
+    expect(split("Read ch. 3 first. Then ch. 4. He said no. Kennedy agreed.")).toEqual([
+      "Read ch. 3 first.",
+      "Then ch. 4.",
+      "He said no.",
+      "Kennedy agreed.",
+    ]);
+  });
+
   it("reads a short month as an abbreviation, and ends a sentence at …", () => {
     expect(split("It was Jan. 5 when we met. We left in Sept. Then it snowed.")).toEqual([
       "It was Jan. 5 when we met.",
