@@ -1,8 +1,7 @@
 import { KeyboardEvent, RefObject, useEffect, useRef } from "react";
 import { CHECKS, CheckId, TRIMS, TrimId } from "../ai/tasks";
-import { useAllLabel } from "../editor/highlights";
+import { ReviewKind, useAllLabel } from "../editor/highlights";
 import { EditorInfo } from "../editor/setup";
-import { Kind } from "../prose";
 import { Icon } from "./Icon";
 import { RightTab } from "./panels";
 
@@ -14,9 +13,9 @@ interface Props {
   /** Live highlights. Null until Review turns them on. */
   checks: EditorInfo["checks"];
   words: number;
-  hidden: readonly Kind[];
-  onToggle(kinds: readonly Kind[]): void;
-  onJump(kinds: readonly Kind[]): void;
+  hidden: readonly ReviewKind[];
+  onToggle(kinds: readonly ReviewKind[]): void;
+  onJump(kinds: readonly ReviewKind[]): void;
   /** Asks Claude for writing issues. */
   onFindIssues(): void;
   /** Uses the fix of the mark at the caret. */
@@ -119,7 +118,7 @@ function Review(props: Props) {
   );
 }
 
-const WEAKENERS: { kind: Kind; one: string; many: string }[] = [
+const WEAKENERS: { kind: ReviewKind; one: string; many: string }[] = [
   { kind: "adverb", one: "adverb", many: "adverbs" },
   { kind: "passive", one: "use of passive voice", many: "uses of passive voice" },
   { kind: "qualifier", one: "qualifier", many: "qualifiers" },
@@ -143,7 +142,7 @@ function Readability({ checks, words, hidden, onToggle, onJump, onUseFix, onUseA
     `of ${total} ${total === 1 ? "sentence" : "sentences"} ${n === 1 ? "is" : "are"} ${what}`;
   const weak = WEAKENERS.map((w) => w.kind);
   const weakCount = checks.weakeners;
-  const row = (kinds: readonly Kind[], tone: string, count: number, label: string, sub = false) => {
+  const row = (kinds: readonly ReviewKind[], tone: string, count: number, label: string, sub = false) => {
     const off = kinds.every((k) => hidden.includes(k));
     return (
       <div className={`hl-row${sub ? " sub" : ""}${off ? " off" : ""}`} key={kinds.join()}>

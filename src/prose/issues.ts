@@ -1,6 +1,5 @@
 // What the checks find: the kinds of marks, each mark, and the report on a page.
 
-// "grammar" comes from Claude, on request (src/ai/tasks.ts). The rest come from here.
 export const KINDS = [
   "veryHard",
   "hard",
@@ -17,7 +16,6 @@ export const KINDS = [
   "simpler",
   "dash",
   "dashStyle",
-  "grammar",
 ] as const;
 export type Kind = (typeof KINDS)[number];
 

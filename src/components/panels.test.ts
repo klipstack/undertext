@@ -58,6 +58,8 @@ describe("Review's eye toggles", () => {
     expect(savedHidden({ hidden: ["adverb", "weasel", 3, "simpler"] })).toEqual(["adverb", "simpler"]);
     expect(savedHidden({ hidden: "adverb" })).toEqual([]);
     expect(savedHidden({})).toEqual([]);
+    // Claude's writing issues are a kind of Review's own, not of the prose checks.
+    expect(savedHidden({ hidden: ["grammar", "cliche"] })).toEqual(["grammar", "cliche"]);
   });
 });
 

@@ -1,4 +1,4 @@
-import { Kind, KINDS } from "../prose";
+import { REVIEW_KINDS, ReviewKind } from "../editor/highlights";
 import type { AltTab } from "./AltPanel";
 
 /** The right panel's tabs. The panel shows one at a time. */
@@ -25,7 +25,7 @@ export function savedPanel(prefs: { panel?: unknown; overflowOpen?: boolean }): 
 }
 
 /** An eye toggle: hides the kinds, or shows them again when all of them are hidden. */
-export function toggleKinds(hidden: readonly Kind[], kinds: readonly Kind[]): Kind[] {
+export function toggleKinds(hidden: readonly ReviewKind[], kinds: readonly ReviewKind[]): ReviewKind[] {
   if (kinds.every((k) => hidden.includes(k))) return hidden.filter((k) => !kinds.includes(k));
   return [...hidden, ...kinds.filter((k) => !hidden.includes(k))];
 }
@@ -56,7 +56,7 @@ export function altPanelHint(tab: AltTab, busy: boolean, pending: boolean): stri
 }
 
 /** The highlight kinds hidden last time. */
-export function savedHidden(prefs: { hidden?: unknown }): Kind[] {
-  const known: readonly unknown[] = KINDS;
-  return Array.isArray(prefs.hidden) ? prefs.hidden.filter((k): k is Kind => known.includes(k)) : [];
+export function savedHidden(prefs: { hidden?: unknown }): ReviewKind[] {
+  const known: readonly unknown[] = REVIEW_KINDS;
+  return Array.isArray(prefs.hidden) ? prefs.hidden.filter((k): k is ReviewKind => known.includes(k)) : [];
 }

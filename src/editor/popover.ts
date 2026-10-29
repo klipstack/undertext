@@ -1,8 +1,8 @@
 import { EditorSelection, EditorState, Facet, Prec, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { EditorView, keymap, showTooltip, Tooltip } from "@codemirror/view";
-import { Issue, Kind, Mistake, sentences } from "../prose";
+import { Kind, Mistake, sentences } from "../prose";
 import { BLOCK_START, ghostAt, ghostRange, leadLength, removeSpan, reviveAt, touchesCode, unbalancedMarkup } from "./commands";
-import { applyFix, issueAt, nextIssue, reviewOpen, shownIssues, writingIssues } from "./highlights";
+import { applyFix, issueAt, nextIssue, ReviewIssue, ReviewKind, reviewOpen, shownIssues, writingIssues } from "./highlights";
 import { layersOf } from "./layers";
 import { fixPunctuation, punctuationAt } from "./proofing";
 import { fixSpelling, guessesFor, learnSpelling, Misspelling, misspellingAt } from "./spelling";
@@ -35,7 +35,7 @@ export interface PunctuationMark extends Mistake {
 }
 
 /** What the popover can be open on: a Review mark, a ghost, a misspelled word, or a punctuation mistake. */
-export type Mark = Issue | GhostMark | SpellingMark | PunctuationMark;
+export type Mark = ReviewIssue | GhostMark | SpellingMark | PunctuationMark;
 
 /** The mark the popover is open on, and where it sits: at the caret when it opened. */
 type Open = Mark & { at: number };
@@ -127,7 +127,7 @@ export function openPopover(state: EditorState): TransactionSpec | null {
 export const closePopover: TransactionSpec = { effects: openEffect.of(null) };
 
 /** A Review row's jump: the caret goes to the next mark of these kinds, and the popover opens on it. */
-export function jumpToMark(state: EditorState, kinds: readonly Kind[], dir: 1 | -1): TransactionSpec | null {
+export function jumpToMark(state: EditorState, kinds: readonly ReviewKind[], dir: 1 | -1): TransactionSpec | null {
   const issue = nextIssue(state, kinds, dir);
   if (!issue) return null;
   return {
@@ -155,13 +155,13 @@ const LEARN: PopoverAction = { kind: "learn", label: "Learn spelling" };
 /** The checker's best guesses the popover offers. */
 const GUESSES = 4;
 
-const CUTS: readonly Kind[] = ["adverb", "qualifier", "intensifier", "filler"];
-const SENTENCES: readonly Kind[] = ["passive", "hard", "veryHard", "dash"];
+const CUTS: readonly ReviewKind[] = ["adverb", "qualifier", "intensifier", "filler"];
+const SENTENCES: readonly ReviewKind[] = ["passive", "hard", "veryHard", "dash"];
 /** Marks whose sentence Claude may rewrite: a whole sentence's, and words no cut or fix mends. */
-const REWRITES: readonly Kind[] = [...SENTENCES, "hidden", "cliche"];
+const REWRITES: readonly ReviewKind[] = [...SENTENCES, "hidden", "cliche"];
 
 /** A hard sentence itself, or the sentence around another mark, after any list or quote marker. */
-function sentenceAround(state: EditorState, issue: Issue): { from: number; to: number } {
+function sentenceAround(state: EditorState, issue: ReviewIssue): { from: number; to: number } {
   if (issue.kind === "hard" || issue.kind === "veryHard") return { from: issue.from, to: issue.to };
   const line = state.doc.lineAt(issue.from);
   const s = sentences(line.text).find((s) => line.from + s.from <= issue.from && issue.to <= line.from + s.to);
@@ -279,7 +279,9 @@ export interface RewriteTarget {
   phrase: string;
 }
 
-function rewriteTarget(state: EditorState, issue: Issue): RewriteTarget | null {
+function rewriteTarget(state: EditorState, issue: ReviewIssue): RewriteTarget | null {
+  // Claude rewrites for the checks' marks only, not its own.
+  if (issue.kind === "grammar") return null;
   const range = rewriteRange(state, issue);
   return range && { ...range, kind: issue.kind, phrase: state.doc.sliceString(issue.from, issue.to) };
 }

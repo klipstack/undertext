@@ -2,7 +2,6 @@ import { history, historyKeymap, insertNewline, standardKeymap } from "@codemirr
 import { markdown } from "@codemirror/lang-markdown";
 import { EditorState, Prec, StateCommand } from "@codemirror/state";
 import { drawSelection, dropCursor, EditorView, keymap } from "@codemirror/view";
-import { Kind, KINDS } from "../prose";
 import { clipboard } from "./clipboard";
 import {
   altInSelection,
@@ -19,7 +18,7 @@ import {
   wordRangeAt,
 } from "./commands";
 import { Layers, MARKDOWN_EXTENSIONS, serializePage } from "./format";
-import { applyAllFixes, highlights, HighlightSettings, highlightReport, issueAt, writingIssues } from "./highlights";
+import { applyAllFixes, highlights, HighlightSettings, highlightReport, issueAt, REVIEW_KINDS, ReviewKind, writingIssues } from "./highlights";
 import { inkLayers } from "./ink";
 import { backspace, enter, setHeading, toggleBold, toggleCode, toggleItalic, toggleLink, toggleList } from "./keys";
 import { jumpToLabSpan, keepCut, lab, labSpanAt, labSpans, labState } from "./lab";
@@ -209,7 +208,7 @@ export interface EditorInfo {
   checks: {
     grade: number | null;
     sentences: number;
-    counts: Record<Kind, number>;
+    counts: Record<ReviewKind, number>;
     /** Weakener marks, each counted once, as Hemingway does. */
     weakeners: number;
     ran: boolean;
@@ -268,7 +267,7 @@ export function describe(state: EditorState): EditorInfo {
   const report = highlightReport(state);
   let checks: EditorInfo["checks"] = null;
   if (report) {
-    const counts = Object.fromEntries(KINDS.map((k) => [k, 0])) as Record<Kind, number>;
+    const counts = Object.fromEntries(REVIEW_KINDS.map((k) => [k, 0])) as Record<ReviewKind, number>;
     const writing = writingIssues(state);
     for (const i of [...report.issues, ...(writing ?? [])]) counts[i.kind] += 1;
     // The popover's mark when it's open, so the panel, the palette, and ⌥↩ all mean the same one.

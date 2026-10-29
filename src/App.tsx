@@ -60,7 +60,7 @@ import {
   wordRangeAt,
 } from "./editor/commands";
 import { parsePage } from "./editor/format";
-import { applyAllFixes, HighlightSettings, setHighlights, setWritingIssues, writingIssues } from "./editor/highlights";
+import { applyAllFixes, HighlightSettings, ReviewKind, setHighlights, setWritingIssues, writingIssues } from "./editor/highlights";
 import { clearLab, ghostLabNotice, ghostLabSpans, jumpToLabSpan, labSpans, labState, makeCuts, setLab } from "./editor/lab";
 import { emptyLayers, layersOf, setLayers as layersEffect } from "./editor/layers";
 import { jumpToMark, RewriteTarget, runFirstAction, useFixAt } from "./editor/popover";
@@ -88,7 +88,6 @@ import { lookUp } from "./lib/lookup";
 import { popupNativeMenu } from "./lib/menu";
 import { speller } from "./lib/spelling";
 import { buildCommands, PaletteCommand } from "./palette/commands";
-import { Kind } from "./prose";
 import { WELCOME } from "./welcome";
 
 const SESSION_KEY = "undertext:session";
@@ -153,7 +152,7 @@ export default function App() {
   const [layers, setLayers] = useState(prefs.layers ?? true);
   const [altOpen, setAltOpen] = useState(false);
   const [panel, setPanel] = useState<RightTab | null>(() => savedPanel(prefs));
-  const [hidden, setHidden] = useState<Kind[]>(() => savedHidden(prefs));
+  const [hidden, setHidden] = useState<ReviewKind[]>(() => savedHidden(prefs));
   const [appearance, setAppearance] = useState<Appearance>(() => savedAppearance(prefs));
   const [systemLight, setSystemLight] = useState(() => matchMedia("(prefers-color-scheme: light)").matches);
   /** Highlights show while Review is open. A new editor state starts with them as they are. */

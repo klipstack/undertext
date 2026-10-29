@@ -1,7 +1,7 @@
 import { invertedEffects, isolateHistory } from "@codemirror/commands";
 import { ChangeSet, EditorSelection, EditorState, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
-import { checkPage, Issue, Kind, Report } from "../prose";
+import { checkPage, Issue, KINDS, Report } from "../prose";
 import { articleFix, BLOCK_START, leadLength, touchesCode } from "./commands";
 import { Alt, newId } from "./format";
 import { layersOf, mapLayers, setLayers } from "./layers";
@@ -11,17 +11,24 @@ import { layersOf, mapLayers, setLayers } from "./layers";
 // grade. They show on the page only while Review is open, which is Hemingway's Edit mode.
 // Nothing here is saved to the file or changes the text, until you use a fix.
 
+/** The kinds of mark in Review: the prose checks', and "grammar" for Claude's writing issues. */
+export const REVIEW_KINDS = [...KINDS, "grammar"] as const;
+export type ReviewKind = (typeof REVIEW_KINDS)[number];
+
 export interface HighlightSettings {
   on: boolean;
   /** Kinds that are counted but not drawn. */
-  hidden: readonly Kind[];
+  hidden: readonly ReviewKind[];
 }
 
 /** A mistake Claude found: grammar, spelling, or a wrong word. `fix` replaces the text, or is empty when there is none. */
-export interface WritingIssue extends Issue {
+export interface WritingIssue extends Omit<Issue, "kind" | "fix"> {
   kind: "grammar";
   fix: string;
 }
+
+/** A mark in Review: one the prose checks found, or one Claude found. */
+export type ReviewIssue = Issue | WritingIssue;
 
 interface HighlightState extends HighlightSettings {
   report: Report;
@@ -42,7 +49,7 @@ const restoreEffect = StateEffect.define<WritingIssue[]>({
 // One decoration per kind, so a keystroke builds no new ones. A click on a mark explains it, in
 // the popover (src/editor/popover.ts).
 const marks = new Map<string, Decoration>();
-function markFor(issue: Issue): Decoration {
+function markFor(issue: ReviewIssue): Decoration {
   let mark = marks.get(issue.kind);
   if (!mark) {
     mark = Decoration.mark({ class: `hl hl-${issue.kind}` });
@@ -139,7 +146,7 @@ export function writingIssues(state: EditorState): WritingIssue[] | null {
 export const reviewOpen = (state: EditorState) => state.field(highlightsField, false)?.on ?? false;
 
 /** The marks on the page while Review is open, writing issues first, without hidden kinds. */
-export function shownIssues(state: EditorState): Issue[] {
+export function shownIssues(state: EditorState): ReviewIssue[] {
   const h = state.field(highlightsField, false);
   if (!h?.on) return [];
   return [...(h.writing ?? []), ...h.report.issues].filter((i) => !h.hidden.includes(i.kind));
@@ -149,15 +156,15 @@ export function shownIssues(state: EditorState): Issue[] {
  * The mark at `pos` that shows, while Review is open: a writing issue first, as it has a fix, then
  * the shortest marked word or phrase, then the sentence around it.
  */
-export function issueAt(state: EditorState, pos: number): Issue | null {
+export function issueAt(state: EditorState, pos: number): ReviewIssue | null {
   const here = shownIssues(state).filter((i) => i.from <= pos && pos <= i.to);
   const words = here.filter((i) => i.kind !== "hard" && i.kind !== "veryHard");
-  const shortest = words.reduce<Issue | null>((a, b) => (a && a.to - a.from <= b.to - b.from ? a : b), null);
+  const shortest = words.reduce<ReviewIssue | null>((a, b) => (a && a.to - a.from <= b.to - b.from ? a : b), null);
   return here.find((i) => i.kind === "grammar") ?? shortest ?? here[0] ?? null;
 }
 
 /** The next or previous shown mark of these kinds from the caret, wrapping around. */
-export function nextIssue(state: EditorState, kinds: readonly Kind[], dir: 1 | -1): Issue | null {
+export function nextIssue(state: EditorState, kinds: readonly ReviewKind[], dir: 1 | -1): ReviewIssue | null {
   const list = shownIssues(state)
     .filter((i) => kinds.includes(i.kind))
     .sort((a, b) => a.from - b.from);
@@ -169,7 +176,7 @@ export function nextIssue(state: EditorState, kinds: readonly Kind[], dir: 1 | -
 }
 
 /** Moves the caret to the next or previous shown mark of these kinds, in mid-window. Null when there is none. */
-export function jumpToIssue(state: EditorState, kinds: readonly Kind[], dir: 1 | -1): TransactionSpec | null {
+export function jumpToIssue(state: EditorState, kinds: readonly ReviewKind[], dir: 1 | -1): TransactionSpec | null {
   const issue = nextIssue(state, kinds, dir);
   if (!issue) return null;
   return { selection: EditorSelection.cursor(issue.from), effects: EditorView.scrollIntoView(issue.from, { y: "center" }) };
@@ -226,7 +233,7 @@ export function fitFix(state: EditorState, from: number, to: number, fix: string
  * suggestion is a style choice, so it becomes an alternative with the fix active and the original
  * kept. Null when the mark has no fix, or the fix has no place (see fitFix).
  */
-export function applyFix(state: EditorState, issue: Issue): TransactionSpec | null {
+export function applyFix(state: EditorState, issue: ReviewIssue): TransactionSpec | null {
   const fit = issue.fix ? fitFix(state, issue.from, issue.to, issue.fix) : null;
   if (!fit) return null;
   const { fix } = fit;
