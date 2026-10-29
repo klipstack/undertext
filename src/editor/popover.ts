@@ -1,6 +1,6 @@
 import { EditorSelection, EditorState, Facet, Prec, StateEffect, StateField, TransactionSpec } from "@codemirror/state";
 import { EditorView, keymap, showTooltip, Tooltip } from "@codemirror/view";
-import { Kind, Mistake, sentences } from "../prose";
+import { Kind, KIND_ADVICE, KIND_TITLES, Mistake, sentences } from "../prose";
 import { BLOCK_START, ghostAt, ghostRange, leadLength, removeSpan, reviveAt, touchesCode, unbalancedMarkup } from "./commands";
 import { applyFix, issueAt, nextIssue, ReviewIssue, ReviewKind, reviewOpen, shownIssues, writingIssues } from "./highlights";
 import { layersOf } from "./layers";
@@ -313,46 +313,18 @@ export function firstAction(state: EditorState): { spec?: TransactionSpec; rewri
 // The popover on the page
 
 const TITLES: Record<Mark["kind"], string> = {
+  ...KIND_TITLES,
   spelling: "Spelling",
   punctuation: "Punctuation",
   ghost: "Ghosted",
-  veryHard: "Very hard to read",
-  hard: "Hard to read",
-  adverb: "Adverb",
-  passive: "Passive voice",
-  qualifier: "Qualifier",
-  intensifier: "Intensifier",
-  weakVerb: "Weak verb",
-  filler: "Filler",
-  hidden: "Hidden action",
-  negative: "Negative",
-  redundant: "Redundant pair",
-  cliche: "Cliché",
-  simpler: "Simpler word",
-  dash: "Dash",
-  dashStyle: "Dash style",
   grammar: "Writing issue",
 };
 
 const ADVICE: Record<Mark["kind"], string> = {
+  ...KIND_ADVICE,
   spelling: SPELLING_NOTE,
   punctuation: "",
   ghost: "Dimmed, so you can read the sentence without it. It's left out of the word count.",
-  veryHard: "Split it, or use shorter words.",
-  hard: "Split it, or use shorter words.",
-  adverb: "An -ly word often props up a weak verb. Cut it if the sentence holds without it.",
-  passive: "It hides who acts. “The door was closed” becomes “She closed the door”.",
-  qualifier: "It hedges. Say it plainly, or cut it.",
-  intensifier: "It tries to add force and rarely does. Cut it, or use a stronger word.",
-  weakVerb: "One precise verb says more than a verb and an adverb.",
-  filler: "It adds words, not meaning.",
-  hidden: "The action hides in a noun. Use the verb.",
-  negative: "Say what is, not what isn't.",
-  redundant: "One word already says it all.",
-  cliche: "Worn smooth by use, it says little. Say what you mean in plain words.",
-  simpler: "A plainer word says the same.",
-  dash: "One dash, or one pair, per paragraph reads well. Try a comma, a colon, parentheses, or a period.",
-  dashStyle: "Write the page's dashes one way.",
   grammar: "",
 };
 

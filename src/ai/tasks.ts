@@ -3,9 +3,8 @@ import { addAiAlternatives, blockAt, countWords, findAlt, syncedVariants, touche
 import { WritingIssue } from "../editor/highlights";
 import { LabSpan } from "../editor/lab";
 import { layersOf } from "../editor/layers";
-import { curlQuotes } from "../editor/smart";
 import { guessesFor, misspellings } from "../editor/spelling";
-import { checkPage, dashesIn, hyphenDashes, Kind } from "../prose";
+import { checkPage, curlQuotes, dashesIn, hyphenDashes, Kind } from "../prose";
 import { callClaude } from "./client";
 
 // Each Lab feature is one Claude call with a JSON answer. Claude quotes the

@@ -2,7 +2,7 @@ import { isolateHistory } from "@codemirror/commands";
 import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import { EditorState, TransactionSpec } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { pageDashStyle } from "../prose";
+import { curlyQuote, pageDashStyle } from "../prose";
 import { leadLength } from "./commands";
 import { pageText } from "./highlights";
 import { layersOf } from "./layers";
@@ -89,27 +89,12 @@ export function smarten(state: EditorState, pos: number): TransactionSpec | null
     const dash = pageDashStyle(pageText(state)) === "spacedEn" ? "–" : "—";
     return own(pos - 2, pos, dash);
   }
-  // Emphasis marks don't count: *"Hi"* opens after the *. So does one after a quote marker or a tag.
-  const prev = before.replace(/[*_~]+$/, "").at(-1);
-  const opens = prev === undefined || /[\s([{“‘>]/.test(prev);
-  const curly = typed === '"' ? (opens ? "“" : "”") : opens ? "‘" : "’";
-  return own(pos - 1, pos, curly);
+  return own(pos - 1, pos, curlyQuote(before, typed));
 }
 
 /** Whether a letter or digit just typed changes what comes before it: a quote after a dash, or a dash between numbers. */
 const follows = (before: string, typed: string) =>
   (/\p{L}/u.test(typed) && /[—–][”’]$/.test(before)) || (/\d/.test(typed) && /\d—$/.test(before));
-
-/** Curly quotes for the straight ones in `text`, by the same rules as typing them. */
-export function curlQuotes(text: string): string {
-  let out = "";
-  for (const c of text) {
-    const prev = out.replace(/[*_~]+$/, "").at(-1);
-    const opens = prev === undefined || /[\s([{“‘>]/.test(prev);
-    out += c === '"' ? (opens ? "“" : "”") : c === "'" ? (opens ? "‘" : "’") : c;
-  }
-  return out;
-}
 
 /** A change that is its own undo step. It counts as typing, so a mark at the caret still waits. */
 const own = (from: number, to: number, insert: string): TransactionSpec => ({

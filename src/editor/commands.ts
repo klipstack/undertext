@@ -1,6 +1,7 @@
 import { isolateHistory } from "@codemirror/commands";
 import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
 import { ChangeSpec, EditorSelection, EditorState, StateCommand, TransactionSpec } from "@codemirror/state";
+import { startsWithVowelSound } from "../prose";
 import { Alt, Layers, newId, parseInline, serializeBlock, Span, Version } from "./format";
 import { blockLines, layersOf, mapLayers, setLayers } from "./layers";
 
@@ -261,15 +262,6 @@ export function articleFix(state: EditorState, from: number, word: string): { fr
   else if (article[0] === article[0].toUpperCase()) replacement = replacement[0].toUpperCase() + replacement.slice(1);
   const artFrom = from - m[2].length - article.length;
   return { from: artFrom, to: artFrom + article.length, insert: replacement };
-}
-
-export function startsWithVowelSound(word: string): boolean {
-  const w = word.trim().toLowerCase().replace(/^[^\p{L}\p{N}]+/u, "");
-  if (!w) return false;
-  if (["hour", "honest", "honor", "honour", "heir"].some((p) => w.startsWith(p))) return true;
-  if (["uni", "use", "usu", "uti", "eu", "one", "once", "ubiq", "uk"].some((p) => w.startsWith(p))) return false;
-  if (/^(8|11|18)/.test(w)) return true;
-  return /^[aeiou]/.test(w);
 }
 
 // ---------------------------------------------------------------------------

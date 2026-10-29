@@ -21,7 +21,6 @@ import {
   settleAll,
   settleVersion,
   setVersionActive,
-  startsWithVowelSound,
   ghostBlocked,
   ghostRange,
   removeSpan,
@@ -126,8 +125,6 @@ describe("alternatives", () => {
     expect(state.doc.toString()).toBe("like an eraser for example");
     state = apply(state, cycleAlt(state, id, 1));
     expect(state.doc.toString()).toBe("like a thumbtack for example");
-    expect(startsWithVowelSound("hour")).toBe(true);
-    expect(startsWithVowelSound("user")).toBe(false);
   });
 
   it("gives each part of a split alternative its own id", () => {
