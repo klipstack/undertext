@@ -3,7 +3,9 @@
 // -ly adverb, a bracket or quote with no partner, and a decade with an apostrophe. The rules are for
 // English. No editor code, so the tests run on plain strings.
 
-import { DASHES, DashStyle, dashStyle, isRange, LY_WORDS, proseBlocks } from "./readability";
+import { DASHES, DashStyle, dashStyle, isRange } from "./dashes";
+import { proseBlocks } from "./markdown";
+import { LY_WORDS } from "./words";
 
 export { dashStyle, type DashStyle };
 

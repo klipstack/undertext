@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { checkPage, Kind, sentences } from "./readability";
+import { Kind } from "./issues";
+import { checkPage } from "./readability";
+import { sentences } from "./sentences";
 
 /** Each issue as its kind and the text it covers, in page order. */
 const found = (text: string, kinds?: Kind[]) =>
