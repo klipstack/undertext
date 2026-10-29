@@ -67,6 +67,13 @@ describe("alternatives", () => {
     expect(save(state)).toBe("Much of the tension comes from here.\n");
   });
 
+  it("keeps the active variant when one before it is removed", () => {
+    let state = stateFor("the {{tension|>pressure|strain}} here\n");
+    state = apply(state, removeAltVariant(state, altIdAt(state, "pressure"), 0));
+    expect(state.doc.toString()).toBe("the pressure here");
+    expect(save(state)).toBe("the {{pressure|strain}} here\n");
+  });
+
   it("keeps in-place edits of the active variant", () => {
     let state = stateFor("the {{tension|>struggle}} here\n");
     const id = altIdAt(state, "struggle");
@@ -339,6 +346,19 @@ describe("undo", () => {
     expect(save(state)).toBe(after);
   });
 
+  it("undoes a swap on its own, not with the typing next to it", () => {
+    let state = stateFor("the {{tension|pressure}}\n");
+    const id = altIdAt(state, "tension");
+    state = state.update({ changes: { from: state.doc.length, insert: " here" }, userEvent: "input.type" }).state;
+    expect(save(state)).toBe("the {{tension|pressure}} here\n");
+    state = apply(state, cycleAlt(state, id, 1));
+    expect(save(state)).toBe("the {{tension|>pressure}} here\n");
+    state = run(state, undo);
+    expect(save(state)).toBe("the {{tension|pressure}} here\n");
+    state = run(state, undo);
+    expect(save(state)).toBe("the {{tension|pressure}}\n");
+  });
+
   it("undoes typing far from any layer without touching the layers", () => {
     let state = stateFor("{{a|b}} and some words\n");
     state = state.update({ changes: { from: state.doc.length, insert: " more" } }).state;
@@ -396,6 +416,13 @@ describe("paragraph versions", () => {
     expect(state.doc.toString()).toBe("Three.");
     expect(save(state)).toBe(":::alt\nOne.\n:::or\nTwo.\n:::or*\nThree.\n:::\n");
   });
+
+  it("keeps the active version when one before it is removed", () => {
+    let state = stateFor(":::alt\nOne.\n:::or*\nTwo.\n:::or\nThree.\n:::\n");
+    state = apply(state, removeVersionVariant(state, 0, 0));
+    expect(state.doc.toString()).toBe("Two.");
+    expect(save(state)).toBe(":::alt*\nTwo.\n:::or\nThree.\n:::\n");
+  });
 });
 
 describe("keyboard navigation", () => {
@@ -421,6 +448,19 @@ describe("keyboard navigation", () => {
     expect(jump(1)).toEqual([35, 2]);
     expect(jump(1)).toEqual([6, 0]);
     expect(jump(-1)).toEqual([35, 2]);
+  });
+
+  it("jumps back from the caret with no last jump", () => {
+    // The palette's "Previous" passes no last jump. "one" starts at 6, "Plain" at 17, and the last
+    // paragraph and "two" at 35. From an item's start, it goes to the one before, not the same one.
+    const back = (pos: number) => {
+      const state = select(stateFor(md), pos);
+      const r = jumpToItem(state, -1, null)!;
+      return [apply(state, r.spec).selection.main.head, r.index];
+    };
+    expect(back(17)).toEqual([6, 0]);
+    expect(back(6)).toEqual([35, 2]);
+    expect(back(0)).toEqual([35, 2]);
   });
 
   it("cycles the word at the caret before its paragraph", () => {
